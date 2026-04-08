@@ -1,0 +1,30 @@
+# 忽略 Python 缓存
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# 忽略虚拟环境
+venv/
+.venv/
+env/
+.env.local
+
+# 忽略 IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# 忽略数据文件（可选，如果想持久化就注释掉）
+# data/
+# logs/
+# reports/
+
+# 忽略测试文件
+test_*.py
+*_test.py
+
+# 忽略文档
+*.md
+!README.md
