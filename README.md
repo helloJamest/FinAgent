@@ -17,12 +17,11 @@
 > ❌ *「多智能体投票」* → ✅ *「多智能体辩论 + 反思驱动自改进」*
 
 系统融合：
-
-- 🧠 Agent Planning（任务拆解）
-- ⚔️ Multi-Agent Debate（多空博弈）
-- 🧩 Tool-augmented Execution（工具调用）
-- 🧠 Memory + Reflection（复盘与长期记忆）
-- 📊 A股特色数据（龙虎榜 / 游资行为）
+🧠 Agent Planning（任务拆解）
+⚔️ Multi-Agent Debate（多空博弈）
+🧩 Tool-augmented Execution（工具调用）
+🧠 Memory + Reflection（复盘与长期记忆）
+ 📊 A股特色数据（龙虎榜 / 游资行为）
 
 ### 🔬 智能体核心组件
 
@@ -42,11 +41,9 @@
 ### 1️⃣ From Voting → Debate（决策机制升级）
 
 Bull 🐂 vs Bear 🐻 → 多轮博弈 → Judge ⚖️裁决 → 收敛决策
-👉 实现：
-
-- 结构化对抗（Structured Debate）
-- 多轮反驳（Iterative Rebuttal）
-- 决策收敛（Convergence）
+👉 实现：结构化对抗（Structured Debate）
+多轮反驳（Iterative Rebuttal）
+决策收敛（Convergence）
 
 ### 2️⃣ Planner–Executor Agent Architecture
 
@@ -65,47 +62,29 @@ Debate System（博弈）
 
 #### 🐂 Bull Agent（看多）
 
-- 专注上涨逻辑
-- 强化趋势 & 资金流
+专注上涨逻辑，强化趋势 & 资金流
 
 #### 🐻 Bear Agent（看空）
 
-- 专注风险识别
-- 强调情绪退潮
+专注风险识别，强调情绪退潮
+
 
 #### ⚖️ Judge Agent（裁决）
 
-评估维度：
+评估维度：证据强度（Evidence Strength）+ 逻辑一致性（Logical Consistency）+ 反驳质量（Rebuttal Quality）+ 幻觉风险（Hallucination Risk）
 
-- 证据强度（Evidence Strength）
-- 逻辑一致性（Logical Consistency）
-- 反驳质量（Rebuttal Quality）
-- 幻觉风险（Hallucination Risk）
 
 ### 4️⃣ A-Share Alpha Module（A股增强模块）
 
 #### 📊 龙虎榜分析（游资行为建模）
 
-- 每日龙虎榜数据解析
-- 游资席位识别
-- 资金流向分析
+每日龙虎榜数据解析，游资席位识别，资金流向分析，捕捉短期主力动向，提升打板成功率
 
-👉 用于：
-
-- 捕捉短期主力动向
-- 提升打板成功率
 
 #### 🚀 打板策略（Limit-Up Strategy）
 
-系统支持：
+连板识别，情绪周期判断，龙头股识别
 
-- 连板识别
-- 情绪周期判断
-- 龙头股识别
-
-👉 专注：
-
-> 短线交易 / 超短策略 / 情绪驱动市场
 
 ### 5️⃣ Reflection & Memory System（复盘进化）
 
@@ -123,16 +102,6 @@ Agent预测 vs 实际结果
 
 ---
 
-## ⚙️ Tech Stack
-
-- **Agent Framework**: LangGraph / LangChain
-- **Architecture**: Planner–Executor / ReAct
-- **Memory**: FAISS + RAG
-- **Backend**: Flask / FastAPI
-- **Data Source**:
-  - AkShare
-
----
 
 ## ⭐ Star
 
