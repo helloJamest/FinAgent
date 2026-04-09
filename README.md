@@ -102,6 +102,20 @@ Agent预测 vs 实际结果
 
 ---
 
+## 🔮 Future Work
+
+- [ ] RL-based Trading Agent
+- [ ] 实盘交易接口
+- [ ] 多模态分析（K线图 + 新闻）
+- [ ] Agent并行调度系统
+
+---
+
+## 👨‍💻 Author
+
+- Based on: [daily_stock_analysis](https://github.com/ZhuLinsen/daily_stock_analysis/tree/main)
+- Enhanced by: *Jamest*
+
 
 ## ⭐ Star
 
