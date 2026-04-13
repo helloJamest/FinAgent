@@ -316,6 +316,15 @@ def build_agent_executor(config=None, skills: Optional[List[str]] = None):
             technical_skill_policy=prompt_state.technical_skill_policy,
         )
 
+    if arch == "debate":
+        return _build_debate_orchestrator(
+            config,
+            registry,
+            llm_adapter,
+            skill_manager,
+            technical_skill_policy=prompt_state.technical_skill_policy,
+        )
+
     from src.agent.executor import AgentExecutor
     return AgentExecutor(
         tool_registry=registry,
@@ -325,6 +334,23 @@ def build_agent_executor(config=None, skills: Optional[List[str]] = None):
         use_legacy_default_prompt=prompt_state.use_legacy_default_prompt,
         max_steps=getattr(config, "agent_max_steps", 10),
         timeout_seconds=getattr(config, "agent_orchestrator_timeout_s", 0),
+    )
+
+
+def _build_debate_orchestrator(config, registry, llm_adapter, skill_manager, *, technical_skill_policy: str = ""):
+    """Build and return a :class:`DebateOrchestrator` (debate mode)."""
+    from src.agent.debate_orchestrator import DebateOrchestrator
+
+    logger.info("[AgentFactory] Building DebateOrchestrator (debate mode)")
+
+    return DebateOrchestrator(
+        tool_registry=registry,
+        llm_adapter=llm_adapter,
+        skill_instructions=skill_manager.get_skill_instructions(),
+        technical_skill_policy=technical_skill_policy,
+        max_steps=getattr(config, "agent_max_steps", 10),
+        skill_manager=skill_manager,
+        config=config,
     )
 
 

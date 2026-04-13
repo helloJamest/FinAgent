@@ -524,7 +524,7 @@ class Config:
     agent_skills: List[str] = field(default_factory=list)
     agent_skill_dir: Optional[str] = None
     agent_nl_routing: bool = False  # Enable natural language routing in bot dispatcher
-    agent_arch: str = "single"     # Agent architecture: 'single' (legacy) or 'multi' (orchestrator)
+    agent_arch: str = "single"     # Agent architecture: 'single' (legacy), 'multi' (orchestrator), or 'debate'
     agent_orchestrator_mode: str = "standard"  # Orchestrator mode: quick/standard/full/specialist
     agent_orchestrator_timeout_s: int = 600  # Cooperative timeout budget for the whole multi-agent pipeline
     agent_risk_override: bool = True  # Allow risk agent to veto buy signals
@@ -536,6 +536,19 @@ class Config:
     agent_event_monitor_enabled: bool = False  # Enable periodic event-driven alert checks in schedule mode
     agent_event_monitor_interval_minutes: int = 5  # Polling interval for event monitor background checks
     agent_event_alert_rules_json: str = ""  # JSON array of serialized EventMonitor rules
+
+    # Debate mode settings
+    debate_enabled: bool = False
+    debate_max_rounds: int = 3
+    debate_consensus_threshold: float = 0.8
+    debate_signal_convergence: int = 1
+
+    # Reflection mode settings
+    reflection_enabled: bool = False
+    reflection_trigger: str = "daily"  # daily / weekly / threshold
+    reflection_lookback_days: int = 7
+    reflection_auto_apply: bool = False
+    reflection_max_lessons: int = 100
 
     # === 通知配置（可同时配置多个，全部推送）===
     
@@ -765,7 +778,7 @@ class Config:
     config_validate_mode: str = "warn"
 
     # --- Post-init validation ---------------------------------------------------
-    _VALID_AGENT_ARCH = {"single", "multi"}
+    _VALID_AGENT_ARCH = {"single", "multi", "debate"}
     _VALID_ORCHESTRATOR_MODES = {"quick", "standard", "full", "specialist"}
     _VALID_SKILL_ROUTING = {"auto", "manual"}
     _WEBUI_RUNTIME_ENV_FILE_PRIORITY_KEYS = frozenset(
@@ -1216,6 +1229,38 @@ class Config:
                 minimum=1,
             ),
             agent_event_alert_rules_json=os.getenv('AGENT_EVENT_ALERT_RULES_JSON', ''),
+            # Debate mode settings
+            debate_enabled=os.getenv('DEBATE_ENABLED', 'false').lower() == 'true',
+            debate_max_rounds=parse_env_int(
+                os.getenv('DEBATE_MAX_ROUNDS'),
+                3,
+                field_name='DEBATE_MAX_ROUNDS',
+                minimum=1,
+                maximum=5,
+            ),
+            debate_consensus_threshold=float(os.getenv('DEBATE_CONSENSUS_THRESHOLD', '0.8')),
+            debate_signal_convergence=parse_env_int(
+                os.getenv('DEBATE_SIGNAL_CONVERGENCE'),
+                1,
+                field_name='DEBATE_SIGNAL_CONVERGENCE',
+                minimum=0,
+            ),
+            # Reflection mode settings
+            reflection_enabled=os.getenv('REFLECTION_ENABLED', 'false').lower() == 'true',
+            reflection_trigger=os.getenv('REFLECTION_TRIGGER', 'daily').lower(),
+            reflection_lookback_days=parse_env_int(
+                os.getenv('REFLECTION_LOOKBACK_DAYS'),
+                7,
+                field_name='REFLECTION_LOOKBACK_DAYS',
+                minimum=1,
+            ),
+            reflection_auto_apply=os.getenv('REFLECTION_AUTO_APPLY', 'false').lower() == 'true',
+            reflection_max_lessons=parse_env_int(
+                os.getenv('REFLECTION_MAX_LESSONS'),
+                100,
+                field_name='REFLECTION_MAX_LESSONS',
+                minimum=10,
+            ),
             wechat_webhook_url=os.getenv('WECHAT_WEBHOOK_URL'),
             feishu_webhook_url=os.getenv('FEISHU_WEBHOOK_URL'),
             feishu_webhook_secret=os.getenv('FEISHU_WEBHOOK_SECRET'),

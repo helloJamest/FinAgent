@@ -56,6 +56,7 @@ class BaseAgent(ABC):
         self.skill_instructions = skill_instructions
         self.technical_skill_policy = technical_skill_policy
         self.memory = AgentMemory.from_config()
+        self._reflection_context: Optional[str] = None
 
     # -----------------------------------------------------------------
     # Abstract interface
@@ -199,6 +200,9 @@ class BaseAgent(ABC):
         memory_context = self._build_memory_context(ctx)
         if memory_context:
             parts.append(memory_context)
+        reflection_context = self._build_reflection_context(ctx)
+        if reflection_context:
+            parts.append(reflection_context)
         return "\n\n".join(parts) if parts else ""
 
     def _filtered_registry(self) -> ToolRegistry:
@@ -218,6 +222,28 @@ class BaseAgent(ABC):
             else:
                 logger.warning("[%s] requested tool '%s' not found in registry", self.agent_name, name)
         return filtered
+
+    def _build_reflection_context(self, ctx: AgentContext) -> str:
+        """Inject reflection-based prompt guidance if reflection is enabled."""
+        if not ctx.stock_code or self._reflection_context is not None:
+            return self._reflection_context or ""
+
+        try:
+            from src.config import get_config
+            config = get_config()
+            if not getattr(config, "reflection_enabled", False):
+                self._reflection_context = ""
+                return ""
+
+            from src.agent.reflection.reflection_engine import ReflectionEngine
+            engine = ReflectionEngine(self.llm_adapter, config=config)
+            context = engine.get_prompt_injections(ctx.stock_code)
+            self._reflection_context = context
+            return context
+        except Exception as exc:
+            logger.debug("[BaseAgent] reflection context unavailable: %s", exc)
+            self._reflection_context = ""
+            return ""
 
     def _build_memory_context(self, ctx: AgentContext) -> str:
         """Summarise recent analysis history for prompt injection."""
