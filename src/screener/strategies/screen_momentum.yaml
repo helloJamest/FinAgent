@@ -1,0 +1,33 @@
+# 动量选股策略
+
+name: screen_momentum
+display_name: 动量选股策略
+description: 趋势跟踪策略，选择多头排列、近期表现强势的股票
+category: momentum
+default_active: true
+default_priority: 14
+required_tools:
+  - get_daily_history
+  - analyze_trend
+aliases: [动量选股, 趋势跟踪, 强势股]
+
+instructions: |
+  ## 动量选股策略
+
+  ### 策略定位
+  趋势跟踪策略，选择多头排列、近期表现强势的股票
+
+  ### 筛选条件
+  1. MA5 >= MA10 >= MA20（多头排列）
+  2. 20日涨幅 > 10%
+  3. 近期有放量（成交量放大 > 50%）
+  4. 股价创近期新高
+  5. 排除已大幅上涨超过50%的股票（追高风险）
+
+  ### 输出格式
+  请按以下JSON数组格式返回候选股票列表：
+  ```json
+  [
+    {"code": "股票代码", "name": "股票名称", "reason": "入选理由（50字以内）", "score": 评分(0-100)}
+  ]
+  ```

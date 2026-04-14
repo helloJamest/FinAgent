@@ -1,0 +1,33 @@
+# 妖股埋伏策略
+
+name: screen_monster_ambush
+display_name: 妖股埋伏策略
+description: 反转策略，埋伏可能成为妖股的小市值标的
+category: reversal
+default_active: true
+default_priority: 13
+required_tools:
+  - get_daily_history
+aliases: [妖股, 妖股埋伏, 小市值反转]
+
+instructions: |
+  ## 妖股埋伏策略
+
+  ### 策略定位
+  反转类策略，在低位埋伏可能成为妖股的小市值标的
+
+  ### 筛选条件
+  1. 总市值 < 30亿（小市值）
+  2. 股价处于相对低位（距离52周高点回撤 > 30%）
+  3. 近期有放量迹象（成交量突然放大）
+  4. 有题材或概念催化（政策利好、行业事件等）
+  5. 排除ST股、*ST股
+  6. 优先选择底部横盘后开始放量的标的
+
+  ### 输出格式
+  请按以下JSON数组格式返回候选股票列表：
+  ```json
+  [
+    {"code": "股票代码", "name": "股票名称", "reason": "入选理由（50字以内）", "score": 评分(0-100)}
+  ]
+  ```

@@ -1,0 +1,37 @@
+# 双低选股策略
+
+name: screen_dual_low
+display_name: 双低选股策略
+description: 稳健长线策略，选择低估值低风险的优质股票
+category: value
+default_active: true
+default_priority: 15
+required_tools:
+  - get_daily_history
+aliases: [双低选股, 低价低估值, 价值双低]
+
+instructions: |
+  ## 双低选股策略
+
+  ### 策略定位
+  稳健长线策略，选择低估值低风险的优质股票
+
+  ### 核心条件
+  - 市盈率(PE-TTM) < 15倍
+  - 市净率(PB) < 2.0
+  - 双低评分: PE + PB×10 < 35
+
+  ### 筛选要求
+  1. 优先选择PE在5-15之间的股票
+  2. PB越低越好，但需大于0
+  3. 排除ST股、*ST股
+  4. 优先选择市值大于50亿的公司
+  5. 近期无明显利空消息
+
+  ### 输出格式
+  请按以下JSON数组格式返回候选股票列表：
+  ```json
+  [
+    {"code": "股票代码", "name": "股票名称", "reason": "入选理由（50字以内）", "score": 评分(0-100)}
+  ]
+  ```

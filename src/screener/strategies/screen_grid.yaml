@@ -1,0 +1,32 @@
+# 网格选股策略
+
+name: screen_grid
+display_name: 网格选股策略
+description: 适合震荡市的网格交易策略，选择波动适中、适合高抛低吸的股票
+category: framework
+default_active: true
+default_priority: 12
+required_tools:
+  - get_daily_history
+aliases: [网格交易, 震荡市选股, 高抛低吸]
+
+instructions: |
+  ## 网格选股策略
+
+  ### 策略定位
+  适合震荡市的网格交易策略，选择波动规律明显、适合高抛低吸的股票
+
+  ### 筛选条件
+  1. 近期呈震荡走势（无明显单边趋势）
+  2. 日均振幅 > 2%（有足够波动空间）
+  3. 日均成交量 > 1000万（流动性好）
+  4. 股价在 5-50 元之间（适合网格操作）
+  5. 排除ST股
+
+  ### 输出格式
+  请按以下JSON数组格式返回候选股票列表：
+  ```json
+  [
+    {"code": "股票代码", "name": "股票名称", "reason": "入选理由（50字以内）", "score": 评分(0-100)}
+  ]
+  ```
