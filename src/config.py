@@ -550,6 +550,12 @@ class Config:
     reflection_auto_apply: bool = False
     reflection_max_lessons: int = 100
 
+    # Hermes learning loop settings
+    hermes_learning_enabled: bool = False
+    hermes_learning_top_k: int = 3  # Skills to retrieve per decision
+    hermes_learning_max_stored: int = 500  # Max skills stored in memory
+    hermes_learning_max_episodes: int = 1000  # Max episodes stored
+
     # === 通知配置（可同时配置多个，全部推送）===
     
     # 企业微信 Webhook
@@ -1259,6 +1265,26 @@ class Config:
                 os.getenv('REFLECTION_MAX_LESSONS'),
                 100,
                 field_name='REFLECTION_MAX_LESSONS',
+                minimum=10,
+            ),
+            hermes_learning_enabled=os.getenv('HERMES_LEARNING_ENABLED', 'false').lower() == 'true',
+            hermes_learning_top_k=parse_env_int(
+                os.getenv('HERMES_LEARNING_TOP_K'),
+                3,
+                field_name='HERMES_LEARNING_TOP_K',
+                minimum=1,
+                maximum=10,
+            ),
+            hermes_learning_max_stored=parse_env_int(
+                os.getenv('HERMES_LEARNING_MAX_STORED'),
+                500,
+                field_name='HERMES_LEARNING_MAX_STORED',
+                minimum=10,
+            ),
+            hermes_learning_max_episodes=parse_env_int(
+                os.getenv('HERMES_LEARNING_MAX_EPISODES'),
+                1000,
+                field_name='HERMES_LEARNING_MAX_EPISODES',
                 minimum=10,
             ),
             wechat_webhook_url=os.getenv('WECHAT_WEBHOOK_URL'),

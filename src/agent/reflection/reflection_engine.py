@@ -31,6 +31,7 @@ from src.agent.reflection.strategy_updater import StrategyMutation, StrategyUpda
 
 if TYPE_CHECKING:
     from src.agent.llm_adapter import LLMToolAdapter
+    from src.agent.learning import TradingSkillMemory, SkillExtractor, EpisodeStore
 
 logger = logging.getLogger(__name__)
 
@@ -58,6 +59,11 @@ class ReflectionEngine:
         self.lesson_bank = LessonBank(max_lessons=self.max_lessons)
         self.self_critic = SelfCritic(llm_adapter)
         self.strategy_updater = StrategyUpdater(lesson_bank=self.lesson_bank)
+
+        # Hermes learning components (optional, injected from factory)
+        self.skill_extractor: Optional["SkillExtractor"] = None
+        self.skill_memory: Optional["TradingSkillMemory"] = None
+        self.episode_store: Optional["EpisodeStore"] = None
 
         # Tracking
         self._last_reflection_time: Optional[float] = None
@@ -121,6 +127,17 @@ class ReflectionEngine:
         mutations: List[StrategyMutation] = []
         if self.auto_apply and storable:
             mutations = self.strategy_updater.apply_lessons(storable)
+
+        # Hermes learning: extract skills and store in vector memory
+        if self.skill_extractor and self.skill_memory and storable:
+            for lesson in storable:
+                try:
+                    skill = self.skill_extractor.extract_skill(lesson)
+                    if skill:
+                        text = f"{skill.skill_name} {skill.description} {skill.trigger_condition} {skill.action}"
+                        self.skill_memory.add_skill(skill, text)
+                except Exception as exc:
+                    logger.warning("[ReflectionEngine] skill extraction failed: %s", exc)
 
         self._last_reflection_time = time.time()
 

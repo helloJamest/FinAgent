@@ -87,6 +87,9 @@ class AgentOrchestrator:
         mode: str = "standard",
         skill_manager=None,
         config=None,
+        skill_memory=None,
+        episode_store=None,
+        debate_tracker=None,
     ):
         self.tool_registry = tool_registry
         self.llm_adapter = llm_adapter
@@ -97,6 +100,9 @@ class AgentOrchestrator:
         self.mode = normalized_mode if normalized_mode in VALID_MODES else "standard"
         self.skill_manager = skill_manager
         self.config = config
+        self.skill_memory = skill_memory
+        self.episode_store = episode_store
+        self.debate_tracker = debate_tracker
 
     def _get_timeout_seconds(self) -> int:
         """Return the pipeline timeout in seconds.

@@ -48,9 +48,15 @@ class DebateArena:
         self,
         llm_adapter,
         config=None,
+        skill_memory=None,
+        episode_store=None,
+        debate_tracker=None,
     ):
         self.llm_adapter = llm_adapter
         self.config = config
+        self.skill_memory = skill_memory
+        self.episode_store = episode_store
+        self.debate_tracker = debate_tracker
         self.max_rounds = _DEFAULT_MAX_ROUNDS
         self.consensus_threshold = _DEFAULT_CONSENSUS_THRESHOLD
         self.signal_convergence = _DEFAULT_SIGNAL_CONVERGENCE
@@ -93,6 +99,12 @@ class DebateArena:
 
         # Collect context data for advocates
         context_data = self._collect_context_data(context, technical_opinion, intel_opinion, risk_opinion)
+
+        # Hermes learning: retrieve relevant skills and inject into context
+        retrieved_skills = self._retrieve_relevant_skills(context_data)
+        if retrieved_skills:
+            context_data["learned_skills"] = retrieved_skills
+            context.set_data("learned_skills", retrieved_skills)
 
         logger.info(
             "[DebateArena] starting debate: %s (%s), max_rounds=%d",
@@ -285,4 +297,96 @@ class DebateArena:
         result.duration_s = round(time.time() - start_time, 2)
         result.tokens_used += total_tokens
         result.consensus_reached = converged
+
+        # Hermes learning: save debate episode
+        if self.episode_store:
+            try:
+                from src.agent.learning.episode_store import LearningEpisode
+                ep = LearningEpisode(
+                    stock_code=state.stock_code,
+                    stock_name=state.stock_name,
+                    date="",
+                    market_features={
+                        "technical_opinion": {
+                            "signal": state.technical_opinion.signal if state.technical_opinion else "",
+                        } if state.technical_opinion else {},
+                    },
+                    debate_signal=result.final_signal,
+                    debate_confidence=result.final_confidence,
+                    debate_rounds=result.rounds_completed,
+                    debate_converged=converged,
+                    final_signal=result.final_signal,
+                    final_confidence=result.final_confidence,
+                )
+                self.episode_store.save(ep)
+            except Exception as exc:
+                logger.warning("[DebateArena] failed to save episode: %s", exc)
+
+        # Hermes learning: track debate performance
+        if self.debate_tracker and state.rounds:
+            try:
+                r1 = state.rounds[0]
+                if r1.bull_argument and r1.bear_argument:
+                    self.debate_tracker.track_debate(
+                        stock_code=state.stock_code,
+                        date="",
+                        bull_signal=r1.bull_argument.signal,
+                        bull_confidence=r1.bull_argument.confidence,
+                        bear_signal=r1.bear_argument.signal,
+                        bear_confidence=r1.bear_argument.confidence,
+                        final_signal=result.final_signal,
+                        final_confidence=result.final_confidence,
+                    )
+            except Exception as exc:
+                logger.warning("[DebateArena] failed to track debate: %s", exc)
+
         return result
+
+    # -----------------------------------------------------------------
+    # Hermes learning helpers
+    # -----------------------------------------------------------------
+
+    def _retrieve_relevant_skills(
+        self,
+        context_data: Dict[str, Any],
+    ) -> str:
+        """Retrieve learned skills relevant to current market conditions."""
+        if not self.skill_memory:
+            return ""
+
+        # Build query from available context
+        query_parts = []
+        tech = context_data.get("technical_opinion", {})
+        if tech:
+            if tech.get("signal"):
+                query_parts.append(tech["signal"])
+            if tech.get("reasoning"):
+                query_parts.append(tech["reasoning"][:200])
+
+        intel = context_data.get("intel_opinion", {})
+        if intel and intel.get("reasoning"):
+            query_parts.append(intel["reasoning"][:200])
+
+        risk = context_data.get("risk_opinion", {})
+        if risk and risk.get("reasoning"):
+            query_parts.append(f"risk: {risk['reasoning'][:200]}")
+
+        if not query_parts:
+            return ""
+
+        query = " ".join(query_parts)
+        skills = self.skill_memory.search(query, top_k=3)
+        if not skills:
+            return ""
+
+        parts = ["\n## Learned Skills from Past Analysis"]
+        parts.append("The following are lessons learned from past prediction errors. ")
+        parts.append("Consider these when forming your arguments.\n")
+        for i, skill in enumerate(skills, 1):
+            parts.append(f"### Skill {i}: {skill.skill_name}")
+            parts.append(f"**Description**: {skill.description}")
+            parts.append(f"**Trigger**: {skill.trigger_condition}")
+            parts.append(f"**Action**: {skill.action}")
+            parts.append("")
+
+        return "\n".join(parts)

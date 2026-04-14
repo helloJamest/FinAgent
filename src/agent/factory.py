@@ -337,11 +337,49 @@ def build_agent_executor(config=None, skills: Optional[List[str]] = None):
     )
 
 
+def _build_hermes_components(config):
+    """Build Hermes learning components when enabled."""
+    hermes_enabled = getattr(config, "hermes_learning_enabled", False)
+    if not hermes_enabled:
+        return {}, None, None, None
+
+    persist_dir = getattr(config, "data_dir", None)
+    if not persist_dir:
+        import os
+        persist_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "data")
+
+    from src.agent.learning import TradingSkillMemory, SkillExtractor, EpisodeStore, DebateTracker
+    from src.agent.llm_adapter import LLMToolAdapter
+
+    llm_adapter = LLMToolAdapter(config)
+    skill_memory = TradingSkillMemory(
+        enabled=hermes_enabled,
+        persist_dir=persist_dir,
+        top_k=getattr(config, "hermes_learning_top_k", 3),
+    )
+    skill_extractor = SkillExtractor(llm_adapter)
+    episode_store = EpisodeStore(
+        persist_dir=persist_dir,
+        max_episodes=getattr(config, "hermes_learning_max_episodes", 1000),
+    )
+    debate_tracker = DebateTracker(persist_dir=persist_dir)
+
+    return {
+        "skill_memory": skill_memory,
+        "skill_extractor": skill_extractor,
+        "episode_store": episode_store,
+        "debate_tracker": debate_tracker,
+    }, skill_memory, episode_store, debate_tracker
+
+
 def _build_debate_orchestrator(config, registry, llm_adapter, skill_manager, *, technical_skill_policy: str = ""):
     """Build and return a :class:`DebateOrchestrator` (debate mode)."""
     from src.agent.debate_orchestrator import DebateOrchestrator
 
     logger.info("[AgentFactory] Building DebateOrchestrator (debate mode)")
+
+    # Build Hermes learning components
+    hermes, skill_memory, episode_store, debate_tracker = _build_hermes_components(config)
 
     return DebateOrchestrator(
         tool_registry=registry,
@@ -351,6 +389,9 @@ def _build_debate_orchestrator(config, registry, llm_adapter, skill_manager, *, 
         max_steps=getattr(config, "agent_max_steps", 10),
         skill_manager=skill_manager,
         config=config,
+        skill_memory=skill_memory,
+        episode_store=episode_store,
+        debate_tracker=debate_tracker,
     )
 
 
@@ -365,6 +406,9 @@ def _build_orchestrator(config, registry, llm_adapter, skill_manager, *, technic
     mode = getattr(config, "agent_orchestrator_mode", "standard")
     logger.info("[AgentFactory] Building AgentOrchestrator (mode=%s)", mode)
 
+    # Build Hermes learning components
+    hermes, skill_memory, episode_store, debate_tracker = _build_hermes_components(config)
+
     return AgentOrchestrator(
         tool_registry=registry,
         llm_adapter=llm_adapter,
@@ -374,6 +418,9 @@ def _build_orchestrator(config, registry, llm_adapter, skill_manager, *, technic
         mode=mode,
         skill_manager=skill_manager,
         config=config,
+        skill_memory=skill_memory,
+        episode_store=episode_store,
+        debate_tracker=debate_tracker,
     )
 
 

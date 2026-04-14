@@ -66,6 +66,9 @@ class DebateOrchestrator:
         max_steps: int = 10,
         skill_manager=None,
         config=None,
+        skill_memory=None,
+        episode_store=None,
+        debate_tracker=None,
     ):
         self.tool_registry = tool_registry
         self.llm_adapter = llm_adapter
@@ -74,6 +77,9 @@ class DebateOrchestrator:
         self.max_steps = max_steps
         self.skill_manager = skill_manager
         self.config = config
+        self.skill_memory = skill_memory
+        self.episode_store = episode_store
+        self.debate_tracker = debate_tracker
 
     def _get_timeout_seconds(self) -> int:
         raw_value = getattr(self.config, "agent_orchestrator_timeout_s", 0)
@@ -202,7 +208,13 @@ class DebateOrchestrator:
         # Step 4: DebateArena
         from src.agent.debate import DebateArena
 
-        arena = DebateArena(self.llm_adapter, config=self.config)
+        arena = DebateArena(
+            self.llm_adapter,
+            config=self.config,
+            skill_memory=self.skill_memory,
+            episode_store=self.episode_store,
+            debate_tracker=self.debate_tracker,
+        )
         debate_result = arena.debate(
             ctx,
             technical_opinion=technical_opinion,
