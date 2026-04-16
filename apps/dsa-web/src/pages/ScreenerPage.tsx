@@ -1,6 +1,6 @@
 import type React from 'react';
 import { useState, useCallback, useEffect } from 'react';
-import { Filter, Loader2, XCircle, CheckCircle2, ChevronDown } from 'lucide-react';
+import { Filter, Loader2, XCircle, CheckCircle2, ChevronDown, TrendingUp, BarChart3, Zap } from 'lucide-react';
 import { screenerApi } from '../api/screener';
 import type { ScreenerCandidate, ScreenerFailedItem, ScreenerStrategyResponse } from '../api/screener';
 import { Card, Badge, EmptyState } from '../components/common';
@@ -28,6 +28,7 @@ const ScreenerPage: React.FC = () => {
   const [candidates, setCandidates] = useState<ScreenerCandidate[]>([]);
   const [failed, setFailed] = useState<ScreenerFailedItem[]>([]);
   const [totalAnalyzed, setTotalAnalyzed] = useState(0);
+  const [hasFinished, setHasFinished] = useState(false);
   const [strategyOpen, setStrategyOpen] = useState(false);
 
   // Load strategies on mount
@@ -44,6 +45,7 @@ const ScreenerPage: React.FC = () => {
       }
     };
     loadStrategies();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleScreen = useCallback(async () => {
@@ -54,6 +56,7 @@ const ScreenerPage: React.FC = () => {
     setCandidates([]);
     setFailed([]);
     setTotalAnalyzed(0);
+    setHasFinished(false);
 
     try {
       // Start screening task
@@ -68,15 +71,17 @@ const ScreenerPage: React.FC = () => {
       const pollInterval = setInterval(async () => {
         try {
           const result = await screenerApi.getResult(accepted.taskId || 'pending');
-          if (result.status === 'completed' || result.candidates.length > 0 || result.failed.length > 0) {
+          if (result.status === 'completed') {
             clearInterval(pollInterval);
+            setIsLoading(false);
+            setIsPolling(false);
+            setHasFinished(true);
             setCandidates(result.candidates);
             setFailed(result.failed);
             setTotalAnalyzed(result.totalAnalyzed);
-            setIsPolling(false);
           }
         } catch {
-          // Still running, keep polling
+          // Still running (202), keep polling
         }
       }, 2000);
 
@@ -99,10 +104,215 @@ const ScreenerPage: React.FC = () => {
     setCandidates([]);
     setFailed([]);
     setTotalAnalyzed(0);
+    setHasFinished(false);
     setError(null);
   };
 
   const selectedStrategyInfo = strategies.find((s) => s.name === selectedStrategy);
+  const isBoardStrategy = selectedStrategy === 'screen_board_play';
+
+  // Group candidates by chain level for board strategy
+  const groupedCandidates = isBoardStrategy
+    ? candidates.reduce<Record<string, ScreenerCandidate[]>>((acc, c) => {
+        const level = (c.metadata?.chain_level as string) || '其他';
+        if (!acc[level]) acc[level] = [];
+        acc[level].push(c);
+        return acc;
+      }, {})
+    : {};
+
+  const chainLevelOrder = ['1进2', '2进3', '3进4'];
+
+  const renderBoardResult = () => {
+    return (
+      <div className="space-y-6">
+        {/* Summary Bar */}
+        <div className="flex items-center gap-4">
+          <Badge variant="success" glow>
+            <CheckCircle2 className="h-3 w-3" />
+            通过 {candidates.length} 只
+          </Badge>
+          {failed.length > 0 && (
+            <Badge variant="default">失败 {failed.length} 只</Badge>
+          )}
+          <span className="text-xs text-muted-foreground">
+            共分析 {totalAnalyzed} 只
+          </span>
+        </div>
+
+        {/* Chain Level Sections */}
+        {chainLevelOrder.map((level) => {
+          const group = groupedCandidates[level] || [];
+          if (group.length === 0) return null;
+          const Icon = level === '1进2' ? TrendingUp : level === '2进3' ? BarChart3 : Zap;
+          const colorClass = level === '3进4' ? 'text-amber-400' : level === '2进3' ? 'text-cyan-400' : 'text-emerald-400';
+
+          return (
+            <div key={level}>
+              <h3 className={`mb-3 flex items-center gap-2 text-sm font-bold ${colorClass}`}>
+                <Icon className="h-4 w-4" />
+                {level} ({group.length} 只)
+              </h3>
+              <div className="space-y-2">
+                {group.map((candidate, index) => (
+                  <Card key={candidate.code} className="p-4 transition-all hover:border-cyan/30">
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white/10 text-xs font-bold text-foreground">
+                          {index + 1}
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <span className="font-mono text-sm font-semibold text-foreground">
+                              {candidate.code}
+                            </span>
+                            <span className="text-sm text-foreground">{candidate.name}</span>
+                          </div>
+                          <p className="mt-1 text-xs text-muted-foreground">{candidate.reason}</p>
+                        </div>
+                      </div>
+                      {candidate.score != null && (
+                        <div className="text-right">
+                          <div className="text-lg font-bold text-foreground">{candidate.score}</div>
+                          <div className="text-xs text-muted-foreground">评分</div>
+                        </div>
+                      )}
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          );
+        })}
+
+        {/* Other candidates (not in chain levels) */}
+        {Object.entries(groupedCandidates)
+          .filter(([level]) => !chainLevelOrder.includes(level))
+          .map(([level, group]) => (
+            <div key={level}>
+              <h3 className="mb-3 flex items-center gap-2 text-sm font-bold text-muted-foreground">
+                <BarChart3 className="h-4 w-4" />
+                {level} ({group.length} 只)
+              </h3>
+              <div className="space-y-2">
+                {group.map((candidate) => (
+                  <Card key={candidate.code} className="p-4 transition-all hover:border-cyan/30">
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white/10 text-xs font-bold text-foreground">
+                          {candidate.code.slice(-2)}
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <span className="font-mono text-sm font-semibold text-foreground">
+                              {candidate.code}
+                            </span>
+                            <span className="text-sm text-foreground">{candidate.name}</span>
+                          </div>
+                          <p className="mt-1 text-xs text-muted-foreground">{candidate.reason}</p>
+                        </div>
+                      </div>
+                      {candidate.score != null && (
+                        <div className="text-right">
+                          <div className="text-lg font-bold text-foreground">{candidate.score}</div>
+                          <div className="text-xs text-muted-foreground">评分</div>
+                        </div>
+                      )}
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          ))}
+
+        {/* Failed Items */}
+        {failed.length > 0 && (
+          <details className="mt-4">
+            <summary className="cursor-pointer text-sm text-muted-foreground">
+              查看失败项 ({failed.length})
+            </summary>
+            <div className="mt-2 space-y-2">
+              {failed.map((item) => (
+                <div key={item.code} className="rounded-lg border border-red-500/20 bg-red-500/5 p-3">
+                  <div className="flex items-center gap-2">
+                    <span className="font-mono text-xs text-foreground">{item.code}</span>
+                    <span className="text-xs text-foreground">{item.name}</span>
+                  </div>
+                  <p className="mt-1 text-xs text-red-400">{item.error}</p>
+                </div>
+              ))}
+            </div>
+          </details>
+        )}
+      </div>
+    );
+  };
+
+  const renderFlatResult = () => (
+    <div className="space-y-3">
+      {/* Summary Bar */}
+      <div className="flex items-center gap-4">
+        <Badge variant="success" glow>
+          <CheckCircle2 className="h-3 w-3" />
+          通过 {candidates.length} 只
+        </Badge>
+        {failed.length > 0 && (
+          <Badge variant="default">失败 {failed.length} 只</Badge>
+        )}
+        <span className="text-xs text-muted-foreground">
+          共分析 {totalAnalyzed} 只
+        </span>
+      </div>
+
+      {/* Candidate Cards */}
+      {candidates.map((candidate, index) => (
+        <Card key={candidate.code} className="p-4 transition-all hover:border-cyan/30">
+          <div className="flex items-start justify-between">
+            <div className="flex items-center gap-3">
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary-gradient text-xs font-bold text-[hsl(var(--primary-foreground))]">
+                {index + 1}
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="font-mono text-sm font-semibold text-foreground">
+                    {candidate.code}
+                  </span>
+                  <span className="text-sm text-foreground">{candidate.name}</span>
+                </div>
+                <p className="mt-1 text-xs text-muted-foreground">{candidate.reason}</p>
+              </div>
+            </div>
+            {candidate.score != null && (
+              <div className="text-right">
+                <div className="text-lg font-bold text-foreground">{candidate.score}</div>
+                <div className="text-xs text-muted-foreground">评分</div>
+              </div>
+            )}
+          </div>
+        </Card>
+      ))}
+
+      {/* Failed Items */}
+      {failed.length > 0 && (
+        <details className="mt-4">
+          <summary className="cursor-pointer text-sm text-muted-foreground">
+            查看失败项 ({failed.length})
+          </summary>
+          <div className="mt-2 space-y-2">
+            {failed.map((item) => (
+              <div key={item.code} className="rounded-lg border border-red-500/20 bg-red-500/5 p-3">
+                <div className="flex items-center gap-2">
+                  <span className="font-mono text-xs text-foreground">{item.code}</span>
+                  <span className="text-xs text-foreground">{item.name}</span>
+                </div>
+                <p className="mt-1 text-xs text-red-400">{item.error}</p>
+              </div>
+            ))}
+          </div>
+        </details>
+      )}
+    </div>
+  );
 
   return (
     <div className={SCREENER_PAGE}>
@@ -282,7 +492,7 @@ const ScreenerPage: React.FC = () => {
               </Card>
             )}
 
-            {!isLoading && !isPolling && candidates.length === 0 && totalAnalyzed === 0 && (
+            {!isLoading && !isPolling && !hasFinished && (
               <Card className="p-12">
                 <EmptyState
                   icon={<Filter className="h-12 w-12 text-muted-foreground/50" />}
@@ -292,12 +502,13 @@ const ScreenerPage: React.FC = () => {
               </Card>
             )}
 
-            {!isLoading && !isPolling && candidates.length === 0 && totalAnalyzed > 0 && (
+            {!isLoading && !isPolling && hasFinished && candidates.length === 0 && (
               <Card className="p-8">
                 <div className="text-center">
                   <XCircle className="mx-auto h-12 w-12 text-muted-foreground/50" />
                   <h3 className="mt-4 text-lg font-semibold text-foreground">未找到符合条件的股票</h3>
                   <p className="mt-2 text-sm text-muted-foreground">
+                    共分析 {totalAnalyzed} 只，但未找到符合条件的标的。
                     尝试调整策略或放宽筛选条件
                   </p>
                 </div>
@@ -305,69 +516,7 @@ const ScreenerPage: React.FC = () => {
             )}
 
             {candidates.length > 0 && (
-              <div className="space-y-3">
-                {/* Summary Bar */}
-                <div className="flex items-center gap-4">
-                  <Badge variant="success" glow>
-                    <CheckCircle2 className="h-3 w-3" />
-                    通过 {candidates.length} 只
-                  </Badge>
-                  {failed.length > 0 && (
-                    <Badge variant="default">失败 {failed.length} 只</Badge>
-                  )}
-                  <span className="text-xs text-muted-foreground">
-                    共分析 {totalAnalyzed} 只
-                  </span>
-                </div>
-
-                {/* Candidate Cards */}
-                {candidates.map((candidate, index) => (
-                  <Card key={candidate.code} className="p-4 transition-all hover:border-cyan/30">
-                    <div className="flex items-start justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary-gradient text-xs font-bold text-[hsl(var(--primary-foreground))]">
-                          {index + 1}
-                        </div>
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <span className="font-mono text-sm font-semibold text-foreground">
-                              {candidate.code}
-                            </span>
-                            <span className="text-sm text-foreground">{candidate.name}</span>
-                          </div>
-                          <p className="mt-1 text-xs text-muted-foreground">{candidate.reason}</p>
-                        </div>
-                      </div>
-                      {candidate.score != null && (
-                        <div className="text-right">
-                          <div className="text-lg font-bold text-foreground">{candidate.score}</div>
-                          <div className="text-xs text-muted-foreground">评分</div>
-                        </div>
-                      )}
-                    </div>
-                  </Card>
-                ))}
-
-                {/* Failed Items */}
-                {failed.length > 0 && (
-                  <details className="mt-4">
-                    <summary className="cursor-pointer text-sm text-muted-foreground">
-                      查看失败项 ({failed.length})
-                    </summary>
-                    <div className="mt-2 space-y-2">
-                      {failed.map((item) => (
-                        <div key={item.code} className="rounded-lg border border-red-500/20 bg-red-500/5 p-3">
-                          <div className="flex items-center gap-2">
-                            <span className="font-mono text-xs text-foreground">{item.code}</span>
-                            <span className="text-xs text-foreground">{item.name}</span>
-                          </div>
-                          <p className="mt-1 text-xs text-red-400">{item.error}</p>
-                        </div>
-                      ))}
-                    </div>
-                  </details>
-                )}
-              </div>
+              isBoardStrategy ? renderBoardResult() : renderFlatResult()
             )}
           </div>
         </div>

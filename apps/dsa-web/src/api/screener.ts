@@ -51,6 +51,18 @@ export interface TaskAccepted {
 
 // ============ Screener API ============
 
+export interface BoardDataResponse {
+  tradeDate: string;
+  lhbCount: number;
+  limitUpCount: number;
+  previousLimitUpCount: number;
+  conceptCount: number;
+  chainLadder: Record<string, Record<string, unknown>[]>;
+  concepts: Record<string, unknown>[];
+  limitUpStocks: Record<string, unknown>[];
+  lhbStocks: Record<string, unknown>[];
+}
+
 export const screenerApi = {
   /**
    * Create a screener task
@@ -60,7 +72,7 @@ export const screenerApi = {
       strategy: data.strategy,
       market: data.market || 'cn',
       max_candidates: data.maxCandidates || 10,
-      validate: data.validate || false,
+      data_validation: data.validate || false,
       analyze_after_screen: data.analyzeAfterScreen || false,
     };
 
@@ -102,5 +114,17 @@ export const screenerApi = {
       `/api/v1/screener/strategies/${name}`
     );
     return toCamelCase<ScreenerStrategyResponse>(response.data);
+  },
+
+  /**
+   * Get board play strategy data (龙虎榜 + 连板天梯)
+   */
+  getBoardData: async (tradeDate?: string): Promise<BoardDataResponse> => {
+    const params = tradeDate ? { trade_date: tradeDate } : {};
+    const response = await apiClient.get<Record<string, unknown>>(
+      '/api/v1/screener/board',
+      { params }
+    );
+    return toCamelCase<BoardDataResponse>(response.data);
   },
 };

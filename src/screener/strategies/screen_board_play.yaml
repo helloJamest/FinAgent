@@ -1,0 +1,67 @@
+name: screen_board_play
+display_name: 打板策略（龙虎榜 + 连板天梯）
+description: >
+  通过获取龙虎榜、涨停池、连板天梯数据，自动筛选1进2/2进3/3进4晋级股，
+  结合热门板块分析，输出板块策略 + 连板预测 + 个股买入建议
+category: momentum
+default_active: true
+default_priority: 20
+required_tools:
+  - stock_lhb_hyyyb_em
+  - stock_zt_pool_em
+  - stock_zt_concept_em
+  - stock_zt_pool_strong_em
+aliases: [打板, 龙虎榜, 连板, 涨停池, 短线]
+
+instructions: |
+  ## 打板策略（短线强势股筛选）
+
+  ### 策略定位
+  短线打板策略，通过分析龙虎榜游资动向、涨停池数据、连板晋级情况和热门板块热度，
+  筛选出最具短线操作价值的标的，并给出板块策略和连板预测。
+
+  ### 数据获取逻辑
+  使用 BoardDataFetcher 获取以下数据：
+  1. 龙虎榜数据 (stock_lhb_hyyyb_em) - 游资买卖明细
+  2. 今日涨停池 (stock_zt_pool_em) - 涨停个股列表
+  3. 昨日涨停池 (stock_zt_pool_previous_em) - 昨日涨停今日表现
+  4. 涨停概念板块 (stock_zt_concept_em) - 热门板块排行
+  5. 连板天梯 (stock_zt_pool_strong_em) - 强势连板股
+
+  ### 筛选条件
+  1. 连板晋级股优先（1进2、2进3、3进4）
+  2. 所属板块为当日涨停数量排名前5的热门板块
+  3. 龙虎榜上榜股票优先（游资介入信号）
+  4. 换手率在 5%-30% 之间（流动性充足但不过度换手）
+  5. 量比 > 1.5（放量确认）
+  6. 排除 ST 股和 *ST 股
+  7. 排除上市不满20个交易日的新股
+  8. 连板数不超过7板（避免情绪过热）
+
+  ### 评分权重
+  - 连板晋级系数: +30分 (1进2: 10分, 2进3: 15分, 3进4: 20分)
+  - 板块热度: +20分 (板块涨停家数 * 2)
+  - 龙虎榜上榜: +15分
+  - 量比: +10分 (量比 > 2 满分)
+  - 换手率适中: +10分 (10%-20% 满分)
+  - 封板时间早: +15分 (9:30-9:45 满分)
+
+  ### 输出格式
+  请按以下JSON数组格式返回候选股票列表：
+  ```json
+  [
+    {
+      "code": "股票代码",
+      "name": "股票名称",
+      "reason": "入选理由（如：2进3 | 半导体板块龙头 | 龙虎榜游资净买入3亿）",
+      "score": 评分(0-100),
+      "chain_level": "连板层级（1进2/2进3/3进4/4板+/概念龙头）",
+      "sector": "所属板块",
+      "turnover_rate": 换手率,
+      "volume_ratio": 量比,
+      "consecutive_days": 连板数,
+      "is_board_play": true,
+      "limit_up_time": "首次封板时间"
+    }
+  ]
+  ```

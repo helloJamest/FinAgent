@@ -12,9 +12,10 @@
 """
 
 import logging
-from typing import List
+from typing import List, Dict, Any, Optional
 
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends, Query
+from pydantic import BaseModel, Field
 
 from api.deps import get_config_dep
 from src.config import Config
@@ -26,6 +27,7 @@ from api.v1.schemas.screener import (
     ScreenerResultResponse,
     ScreenerStrategyResponse,
 )
+from src.screener.board_screener import BoardDataFetcher
 
 logger = logging.getLogger(__name__)
 
@@ -73,7 +75,7 @@ async def create_screen_task(
         strategy=request.strategy,
         market=request.market,
         max_candidates=request.max_candidates,
-        validate=request.validate,
+        validate=request.data_validation,
         analyze_after_screen=request.analyze_after_screen,
     )
 
@@ -192,4 +194,66 @@ async def get_strategy(
         description=strategy.description,
         category=strategy.category,
         default_priority=strategy.default_priority,
+    )
+
+
+# ============================================================
+# GET /board - 获取打板策略数据
+# ============================================================
+
+class BoardDataResponse(BaseModel):
+    """打板策略数据响应"""
+    trade_date: str = Field(..., description="交易日期")
+    lhb_count: int = Field(0, description="龙虎榜条目数")
+    limit_up_count: int = Field(0, description="涨停股数")
+    previous_limit_up_count: int = Field(0, description="昨日涨停数")
+    concept_count: int = Field(0, description="涨停概念数")
+    chain_ladder: Dict[str, Any] = Field(default_factory=dict, description="连板天梯")
+    concepts: List[Dict[str, Any]] = Field(default_factory=list, description="热门概念板块")
+    limit_up_stocks: List[Dict[str, Any]] = Field(default_factory=list, description="涨停池")
+    lhb_stocks: List[Dict[str, Any]] = Field(default_factory=list, description="龙虎榜")
+
+
+@router.get(
+    "/board",
+    response_model=BoardDataResponse,
+    summary="获取打板策略数据",
+    description="获取龙虎榜、涨停池、连板天梯、涨停概念等打板相关数据",
+)
+async def get_board_data(
+    trade_date: Optional[str] = Query(None, description="交易日期 YYYYMMDD，默认今日"),
+):
+    """获取打板策略数据"""
+    fetcher = BoardDataFetcher()
+    data = fetcher.get_all_board_data(trade_date=trade_date)
+
+    chain_ladder = {}
+    for level, stocks in data.get("chain_ladder", {}).items():
+        chain_ladder[level] = [s.to_dict() if hasattr(s, "to_dict") else s for s in stocks]
+
+    concepts = [
+        c.to_dict() if hasattr(c, "to_dict") else c
+        for c in data.get("concepts", [])
+    ]
+
+    limit_up = [
+        s.to_dict() if hasattr(s, "to_dict") else s
+        for s in data.get("limit_up", [])
+    ]
+
+    lhb = [
+        e.to_dict() if hasattr(e, "to_dict") else e
+        for e in data.get("lhb", [])
+    ]
+
+    return BoardDataResponse(
+        trade_date=data.get("trade_date", ""),
+        lhb_count=len(data.get("lhb", [])),
+        limit_up_count=len(data.get("limit_up", [])),
+        previous_limit_up_count=len(data.get("previous_limit_up", [])),
+        concept_count=len(data.get("concepts", [])),
+        chain_ladder=chain_ladder,
+        concepts=concepts,
+        limit_up_stocks=limit_up,
+        lhb_stocks=lhb,
     )

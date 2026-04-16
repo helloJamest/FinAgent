@@ -19,7 +19,7 @@ class ScreenerScreenRequest(BaseModel):
     strategy: str = Field(..., description="策略名称，如 screen_three_line")
     market: str = Field(default="cn", description="市场: cn/us/hk")
     max_candidates: int = Field(default=10, description="最大候选数量", ge=1, le=100)
-    validate: bool = Field(default=False, description="是否进行数据验证")
+    data_validation: bool = Field(default=False, description="是否进行数据验证")
     analyze_after_screen: bool = Field(default=False, description="筛选后是否进行分析")
 
 

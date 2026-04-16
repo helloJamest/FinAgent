@@ -81,11 +81,16 @@ class ScreenerPipeline:
 
         logger.info("开始选股筛选 (任务: %s, 策略: %s)", task_id, strategy_name)
 
-        # 2. LLM筛选
+        # 2. LLM筛选 / 打板策略
         if progress_callback:
-            progress_callback(5, "正在初始化 LLM 筛选器...")
+            progress_callback(5, "正在初始化筛选器...")
 
-        screener = LLMScreener(strategy=strategy, config=self.config)
+        # 打板策略使用专用的 BoardScreener
+        if strategy_name == "screen_board_play":
+            from src.screener.board_screener import BoardScreener
+            screener = BoardScreener(strategy=strategy)
+        else:
+            screener = LLMScreener(strategy=strategy, config=self.config)
         candidates = await screener.screen(
             market=market,
             max_candidates=max_candidates,
