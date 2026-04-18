@@ -35,8 +35,8 @@ Agent 决策 (单 Agent ReAct 或 多 Agent 编排)
 | 通知层 | `src/notification.py` + `src/notification_sender/` | 多渠道推送 |
 | API 层 | `api/` | FastAPI REST 服务 |
 | Bot 层 | `bot/` | 钉钉/飞书/Discord 机器人 |
-| 前端层 | `apps/dsa-web/` | Vue 3 Web 前端 |
-| 桌面层 | `apps/dsa-desktop/` | Electron 桌面端 |
+| 前端层 | `apps/finagent-web/` | Vue 3 Web 前端 |
+| 桌面层 | `apps/finagent-desktop/` | Electron 桌面端 |
 
 ---
 

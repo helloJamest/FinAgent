@@ -234,7 +234,7 @@ class SystemConfigService:
         return self.update(
             config_version=config_version,
             items=updates,
-            mask_token="__DSA_IMPORT_LITERAL_MASK__",
+            mask_token="__FINAGENT_IMPORT_LITERAL_MASK__",
             reload_now=reload_now,
         )
 

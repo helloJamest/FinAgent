@@ -53,7 +53,7 @@ const HomePage: React.FC = () => {
   } = useHomeDashboardState();
 
   useEffect(() => {
-    document.title = '每日选股分析 - DSA';
+    document.title = '每日选股分析 - FinAgent';
   }, []);
   const reportLanguage = normalizeReportLanguage(selectedReport?.meta.reportLanguage);
   const reportText = getReportText(reportLanguage);

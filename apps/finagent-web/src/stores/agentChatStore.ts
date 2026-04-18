@@ -10,7 +10,7 @@ import {
 } from '../api/error';
 import { generateUUID } from '../utils/uuid';
 
-const STORAGE_KEY_SESSION = 'dsa_chat_session_id';
+const STORAGE_KEY_SESSION = 'finagent_chat_session_id';
 
 export interface ProgressStep {
   type: string;

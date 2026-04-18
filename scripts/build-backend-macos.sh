@@ -23,7 +23,7 @@ if ! command -v "${PYTHON_BIN}" >/dev/null 2>&1; then
 fi
 
 log "Building React UI (static assets)..."
-pushd "${ROOT_DIR}/apps/dsa-web" >/dev/null
+pushd "${ROOT_DIR}/apps/finagent-web" >/dev/null
 if [[ ! -d node_modules ]]; then
   npm install
 fi

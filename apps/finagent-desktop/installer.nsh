@@ -16,28 +16,28 @@ Function .onVerifyInstDir
   ; --- Block $PROGRAMFILES (C:\Program Files on x64 installer) ---
   StrLen $R0 $PROGRAMFILES
   StrCpy $R1 $INSTDIR $R0
-  StrCmp $R1 $PROGRAMFILES _dsa_reject
+  StrCmp $R1 $PROGRAMFILES _finagent_reject
 
   ; --- Block $PROGRAMFILES64 ---
   StrLen $R0 $PROGRAMFILES64
   StrCpy $R1 $INSTDIR $R0
-  StrCmp $R1 $PROGRAMFILES64 _dsa_reject
+  StrCmp $R1 $PROGRAMFILES64 _finagent_reject
 
   ; --- Block $PROGRAMFILES32 (C:\Program Files (x86)) ---
   StrLen $R0 $PROGRAMFILES32
   StrCpy $R1 $INSTDIR $R0
-  StrCmp $R1 $PROGRAMFILES32 _dsa_reject
+  StrCmp $R1 $PROGRAMFILES32 _finagent_reject
 
   ; --- Block $WINDIR (C:\Windows and subdirectories) ---
   StrLen $R0 $WINDIR
   StrCpy $R1 $INSTDIR $R0
-  StrCmp $R1 $WINDIR _dsa_reject
+  StrCmp $R1 $WINDIR _finagent_reject
 
   Pop $R1
   Pop $R0
   Return
 
-_dsa_reject:
+_finagent_reject:
   Pop $R1
   Pop $R0
   Abort

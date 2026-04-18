@@ -20,7 +20,7 @@ This document compiles common issues encountered by users and their solutions.
    ```
    This prioritizes Yahoo Finance data source for US stock data
 
-> Related Issue: [#153](https://github.com/ZhuLinsen/daily_stock_analysis/issues/153)
+> Related Issue: [#153](https://github.com/helloJamest/FinAgent/issues/153)
 
 ---
 
@@ -38,7 +38,7 @@ This document compiles common issues encountered by users and their solutions.
    ```
 3. System has built-in 5-day average volume calculation as fallback
 
-> Related Issue: [#155](https://github.com/ZhuLinsen/daily_stock_analysis/issues/155)
+> Related Issue: [#155](https://github.com/helloJamest/FinAgent/issues/155)
 
 ---
 
@@ -319,7 +319,7 @@ python main.py --market-only
 
 If the above content doesn't solve your issue, welcome to:
 1. Check [Complete Configuration Guide](full-guide_EN.md)
-2. Search or submit [GitHub Issue](https://github.com/ZhuLinsen/daily_stock_analysis/issues)
+2. Search or submit [GitHub Issue](https://github.com/helloJamest/FinAgent/issues)
 3. Check [Changelog](CHANGELOG.md) for latest fixes
 
 ---

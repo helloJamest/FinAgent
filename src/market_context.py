@@ -6,7 +6,7 @@ Detects the market (A-shares, HK, US) from a stock code and returns
 market-specific role descriptions so prompts are not hardcoded to a
 single market.
 
-Fixes: https://github.com/ZhuLinsen/daily_stock_analysis/issues/644
+Fixes: https://github.com/helloJamest/FinAgent/issues/644
 """
 
 import re

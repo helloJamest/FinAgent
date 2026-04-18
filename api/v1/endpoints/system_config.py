@@ -40,7 +40,7 @@ router = APIRouter()
 
 def _ensure_desktop_mode() -> None:
     """Restrict desktop backup/restore endpoints to desktop runtime only."""
-    if os.getenv("DSA_DESKTOP_MODE", "").strip().lower() != "true":
+    if os.getenv("FINAGENT_DESKTOP_MODE", "").strip().lower() != "true":
         raise HTTPException(
             status_code=403,
             detail={

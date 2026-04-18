@@ -2,16 +2,16 @@
 
 # 股票智能分析系統
 
-[![GitHub stars](https://img.shields.io/github/stars/ZhuLinsen/daily_stock_analysis?style=social)](https://github.com/ZhuLinsen/daily_stock_analysis/stargazers)
-[![CI](https://github.com/ZhuLinsen/daily_stock_analysis/actions/workflows/ci.yml/badge.svg)](https://github.com/ZhuLinsen/daily_stock_analysis/actions/workflows/ci.yml)
+[![GitHub stars](https://img.shields.io/github/stars/helloJamest/FinAgent?style=social)](https://github.com/helloJamest/FinAgent/stargazers)
+[![CI](https://github.com/helloJamest/FinAgent/actions/workflows/ci.yml/badge.svg)](https://github.com/helloJamest/FinAgent/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![GitHub Actions](https://img.shields.io/badge/GitHub%20Actions-Ready-2088FF?logo=github-actions&logoColor=white)](https://github.com/features/actions)
 [![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?logo=docker&logoColor=white)](https://hub.docker.com/)
 
 <p>
-  <a href="https://trendshift.io/repositories/18527" target="_blank"><img src="https://trendshift.io/api/badge/repositories/18527" alt="ZhuLinsen%2Fdaily_stock_analysis | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
-  <a href="https://hellogithub.com/repository/ZhuLinsen/daily_stock_analysis" target="_blank"><img src="https://api.hellogithub.com/v1/widgets/recommend.svg?rid=6daa16e405ce46ed97b4a57706aeb29f&claim_uid=pfiJMqhR9uvDGlT&theme=neutral" alt="Featured｜HelloGitHub" style="width: 250px; height: 54px;" width="250" height="54" /></a>
+  <a href="https://trendshift.io/repositories/18527" target="_blank"><img src="https://trendshift.io/api/badge/repositories/18527" alt="helloJamest%2FFinAgent | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
+  <a href="https://hellogithub.com/repository/helloJamest/FinAgent" target="_blank"><img src="https://api.hellogithub.com/v1/widgets/recommend.svg?rid=6daa16e405ce46ed97b4a57706aeb29f&claim_uid=pfiJMqhR9uvDGlT&theme=neutral" alt="Featured｜HelloGitHub" style="width: 250px; height: 54px;" width="250" height="54" /></a>
 </p>
 
 **基於 AI 大模型的 A股/港股/美股 智能分析系統**
@@ -29,7 +29,7 @@
 ## 💖 贊助商 (Sponsors)
 
 <div align="center">
-  <a href="https://serpapi.com/baidu-search-api?utm_source=github_daily_stock_analysis" target="_blank">
+  <a href="https://serpapi.com/baidu-search-api?utm_source=github_FinAgent" target="_blank">
     <img src="../sources/serpapi_banner_zh.png" alt="輕鬆抓取搜尋引擎上的即時金融新聞數據 - SerpApi" height="160">
   </a>
 </div>
@@ -138,7 +138,7 @@
 | `MINIMAX_API_KEYS` | [MiniMax](https://platform.minimaxi.com/) Coding Plan Web Search（結構化搜索結果） | 可選 |
 | `BOCHA_API_KEYS` | [博查搜索](https://open.bocha.cn/) Web Search API（中文搜索優化，支持AI摘要，多個key用逗號分隔） | 可選 |
 | `BRAVE_API_KEYS` | [Brave Search](https://brave.com/search/api/) API（隱私優先，美股優化，多個key用逗號分隔） | 可選 |
-| `SERPAPI_API_KEYS` | [SerpAPI](https://serpapi.com/baidu-search-api?utm_source=github_daily_stock_analysis) 備用搜索 | 可選 |
+| `SERPAPI_API_KEYS` | [SerpAPI](https://serpapi.com/baidu-search-api?utm_source=github_FinAgent) 備用搜索 | 可選 |
 | `SEARXNG_BASE_URLS` | SearXNG 自建實例（無配額兜底，需在 settings.yml 啟用 format: json）；留空時預設自動發現公共實例 | 可選 |
 | `SEARXNG_PUBLIC_INSTANCES_ENABLED` | 是否在 `SEARXNG_BASE_URLS` 為空時自動從 `searx.space` 取得公共實例（預設 `true`） | 可選 |
 | `TUSHARE_TOKEN` | [Tushare Pro](https://tushare.pro/weborder/#/login?reg=834638 ) Token | 可選 |
@@ -274,7 +274,7 @@
 ## 項目結構
 
 ```
-daily_stock_analysis/
+FinAgent/
 ├── main.py              # 主程序入口
 ├── server.py            # FastAPI 服務入口
 ├── src/                 # 核心業務代碼
@@ -297,7 +297,7 @@ daily_stock_analysis/
 
 ## 🗺️ Roadmap
 
-> 📢 以下功能將視後續情況逐步完成，如果你有好的想法或建議，歡迎 [提交 Issue](https://github.com/ZhuLinsen/daily_stock_analysis/issues) 討論！
+> 📢 以下功能將視後續情況逐步完成，如果你有好的想法或建議，歡迎 [提交 Issue](https://github.com/helloJamest/FinAgent/issues) 討論！
 
 ### 🔔 通知渠道擴展
 - [x] 企業微信機器人
@@ -341,24 +341,24 @@ daily_stock_analysis/
 詳見 [貢獻指南](CONTRIBUTING.md)
 
 ## License
-[MIT License](../LICENSE) © 2026 ZhuLinsen
+[MIT License](../LICENSE) © 2026 helloJamest
 
 如果你在項目中使用或基於本项目进行二次开发，
 非常歡迎在 README 或文檔中註明來源並附上本倉庫鏈接。
 這將有助於項目的持續維護和社區發展。
 
 ## 聯繫與合作
-- GitHub Issues：[提交 Issue](https://github.com/ZhuLinsen/daily_stock_analysis/issues)
+- GitHub Issues：[提交 Issue](https://github.com/helloJamest/FinAgent/issues)
 - 合作郵箱：zhuls345@gmail.com
 
 ## Star History
 **如果覺得有用，請給個 ⭐ Star 支持一下！**
 
-<a href="https://star-history.com/#ZhuLinsen/daily_stock_analysis&Date">
+<a href="https://star-history.com/#helloJamest/FinAgent&Date">
  <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=ZhuLinsen/daily_stock_analysis&type=Date&theme=dark" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=ZhuLinsen/daily_stock_analysis&type=Date" />
-   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=ZhuLinsen/daily_stock_analysis&type=Date" />
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=helloJamest/FinAgent&type=Date&theme=dark" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=helloJamest/FinAgent&type=Date" />
+   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=helloJamest/FinAgent&type=Date" />
  </picture>
 </a>
 

@@ -1,5 +1,5 @@
 const { contextBridge } = require('electron');
 
-contextBridge.exposeInMainWorld('dsaDesktop', {
+contextBridge.exposeInMainWorld('finagentDesktop', {
   version: '0.1.0',
 });

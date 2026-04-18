@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
-> For user-friendly release highlights, see the [GitHub Releases](https://github.com/ZhuLinsen/daily_stock_analysis/releases) page.
+> For user-friendly release highlights, see the [GitHub Releases](https://github.com/helloJamest/FinAgent/releases) page.
 
 ## [Unreleased]
 
@@ -48,7 +48,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ### 新功能
 
 - 📊 **回测页新增"次日验证 / 1 日窗口"视图** — 可按股票代码与分析日期范围查看 AI 预测、次日实际涨跌及筛选区间准确率，复用历史分析与 1 日回测结果实现。
-- 🏷️ **Web 设置页新增版本信息卡片** — `apps/dsa-web` 现在会在构建时注入前端包版本与构建时间，系统设置页新增只读"版本信息"区块，展示 `WebUI 版本 / 构建标识 / 构建时间`；当 `package.json` 仍为占位版本 `0.0.0` 时，会自动回退为构建标识，方便 Docker 重建后快速确认当前静态资源是否已经生效。
+- 🏷️ **Web 设置页新增版本信息卡片** — `apps/finagent-web` 现在会在构建时注入前端包版本与构建时间，系统设置页新增只读"版本信息"区块，展示 `WebUI 版本 / 构建标识 / 构建时间`；当 `package.json` 仍为占位版本 `0.0.0` 时，会自动回退为构建标识，方便 Docker 重建后快速确认当前静态资源是否已经生效。
 - 🪟 **Windows 桌面安装器支持自选安装目录** — 安装器改为支持在安装向导中自定义安装目录，安装到非默认盘符后仍沿用现有打包态目录逻辑在安装目录旁读写 `.env`、`data/stock_analysis.db` 和 `logs/desktop.log`，同时保留 `win-unpacked` 免安装分发方式。安装器仅支持当前用户安装、已禁用管理员提权（`allowElevation: false`），并通过 NSIS `.onVerifyInstDir` 阻止选择系统保护目录。
 
 ### 改进
@@ -59,7 +59,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ### 修复
 
 - 🚀 **启动早期失败时暴露真实根因** — `python main.py` 现在通过 stderr 暴露真实根因，bootstrap 阶段不再向硬编码 `logs/` 目录写入文件日志，文件日志推迟到 `config.log_dir` 可用后创建，避免健康启动在非预期路径残留日志文件。
-- 🐳 **Docker WebUI 运行时优先复用预构建静态资源** — `prepare_webui_frontend_assets()` 现在会先检查镜像内已有的 `static/index.html` 是否可直接复用；当容器运行时不包含 `apps/dsa-web` 源码目录且未安装 `npm` 时，也不会误报"未找到前端项目，无法自动构建"，从而恢复 Docker 部署后的 WebUI 打开能力。
+- 🐳 **Docker WebUI 运行时优先复用预构建静态资源** — `prepare_webui_frontend_assets()` 现在会先检查镜像内已有的 `static/index.html` 是否可直接复用；当容器运行时不包含 `apps/finagent-web` 源码目录且未安装 `npm` 时，也不会误报"未找到前端项目，无法自动构建"，从而恢复 Docker 部署后的 WebUI 打开能力。
 - 🐳 **Docker WebUI 系统设置保存后配置生效** — Docker 场景下 WebUI 保存 `STOCK_LIST`、`SCHEDULE_ENABLED`、`SCHEDULE_TIME`、`SCHEDULE_RUN_IMMEDIATELY`、`RUN_IMMEDIATELY` 后，`Config` 会优先读取持久化 `.env` 中的新值，避免被容器创建时注入的旧环境变量覆盖。
 - 📈 **市场复盘 LLM max_tokens 提升** — 市场复盘生成链路将 LLM `max_tokens` 从 `2048` 提升到 `8192`，降低长复盘输出因 `MAX_TOKENS` 提前截断导致内容未完成的概率。
 - ⏰ **内置定时调度器感知 SCHEDULE_TIME 运行时变更** — 调度器现在会在运行中感知 WebUI 保存后的 `SCHEDULE_TIME` 变化，并在下一轮检查时重绑 daily job。
@@ -77,7 +77,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - 🧪 **补充设置页版本信息回归测试** — 新增 Web 设置页版本信息渲染断言，并覆盖占位版本 `0.0.0` 自动回退为构建标识的逻辑。
 - 🧪 **UI 治理与关键路径回归补强** — 补充 `SidebarNav`、`ChatPage`、`BacktestPage` 等组件测试，并新增 UI governance 守卫，持续防止交互元素重新引入原生 `title` 属性或旧 `input-terminal` 样式回流。同步更新 smoke / markdown drawer 相关验证，覆盖主题升级后的关键主链路。
 
-- [修复] 🐳 **Docker WebUI 运行时优先复用预构建静态资源** — `prepare_webui_frontend_assets()` 现在会先检查镜像内已有的 `static/index.html` 是否可直接复用；当容器运行时不包含 `apps/dsa-web` 源码目录且未安装 `npm` 时，也不会误报“未找到前端项目，无法自动构建”，从而恢复 Docker 部署后的 WebUI 打开能力。
+- [修复] 🐳 **Docker WebUI 运行时优先复用预构建静态资源** — `prepare_webui_frontend_assets()` 现在会先检查镜像内已有的 `static/index.html` 是否可直接复用；当容器运行时不包含 `apps/finagent-web` 源码目录且未安装 `npm` 时，也不会误报“未找到前端项目，无法自动构建”，从而恢复 Docker 部署后的 WebUI 打开能力。
 - [改进] 🔎 **SerpAPI 正文补抓范围收敛** — 自然搜索结果不再逐条同步抓取网页正文；现在仅对极少数高位且摘要明显不足的结果，在更短超时预算内做延迟补抓，并优先复用 SerpAPI 已返回的结构化摘要，降低搜索链路尾延迟与慢站点放大风险。
 - [修复] A 股和中文股票名称场景下的相关资讯搜索恢复中文优先策略：`search_stock_news()` 现在会在首个 provider 主要返回英文资讯时继续尝试后续引擎，并将同批结果中的中文资讯排到前面；同时非美股查询不再默认沿用 Brave 的 `en/US` 区域语言偏好，避免更新后被英文新闻结果占满。
 - [修复] 飞书群机器人通知现在支持 `FEISHU_WEBHOOK_SECRET` / `FEISHU_WEBHOOK_KEYWORD`，并在 Web 设置与文档中明确区分 Webhook 推送和 `FEISHU_APP_ID` / `FEISHU_APP_SECRET` 应用模式，降低误配导致的推送失败。
@@ -111,7 +111,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### 修复
 
-- 🌗 **Web 首屏默认主题预设为深色** — `apps/dsa-web/index.html` 现在会在 React 挂载前读取本地保存的主题偏好；若没有已保存值，则立即给 `<html>` 预设 `dark` 并同步 `color-scheme`，避免首页和登录页首屏先闪出浅色主题。
+- 🌗 **Web 首屏默认主题预设为深色** — `apps/finagent-web/index.html` 现在会在 React 挂载前读取本地保存的主题偏好；若没有已保存值，则立即给 `<html>` 预设 `dark` 并同步 `color-scheme`，避免首页和登录页首屏先闪出浅色主题。
 - 🔐 **登录页独立主题层收口** — 登录页输入框、标签、切换按钮和按钮文案现在使用独立的 `--login-*` 视觉 token，不再继承全局浅/深主题文字色；即使浏览器缓存了浅色主题，登录页仍保持稳定的深色视觉与青色密码输入表现，避免密码圆点和文案落成黑色。
 - 🖥️ **首页港股代码输入修复** — Web 首页分析输入框现在可正确接受港股代码与自动完成选中的港股项，补齐 `00700.HK` / `HK00700` 等格式识别，避免提交时误报“请输入有效的股票代码或股票名称”。
 
@@ -342,7 +342,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 - 🗑️ **History batch deletion** — Web UI now supports multi-selection and batch deletion of analysis history; added `POST /api/v1/history/batch-delete` endpoint and `ConfirmDialog` component.
 - 🔐 **Auth settings API** — new `POST /api/v1/auth/settings` endpoint to enable or disable Web authentication at runtime and set the initial admin password when needed
-- openclaw Skill 集成指南 — 新增 [docs/openclaw-skill-integration.md](openclaw-skill-integration.md)，说明如何通过 openclaw Skill 调用 DSA API
+- openclaw Skill 集成指南 — 新增 [docs/openclaw-skill-integration.md](openclaw-skill-integration.md)，说明如何通过 openclaw Skill 调用 FinAgent API
 - ⚙️ **LLM channel protocol/test UX** — `.env` and Web settings now share the same channel shape (`LLM_CHANNELS` + `LLM_<NAME>_PROTOCOL/BASE_URL/API_KEY/MODELS/ENABLED`); settings page adds per-channel connection testing, primary/fallback/vision model selection, and protocol-aware model prefixing
 - 🤖 **Agent architecture Phase 0+1** — shared protocols (`AgentContext`, `AgentOpinion`, `StageResult`), extracted `run_agent_loop()` runner, `AGENT_ARCH` switch (`single`/`multi`), config registry entries
 - 🔍 **Bot NL routing** — two-layer natural-language routing: cheap regex pre-filter (stock codes + finance keywords) → lightweight LLM intent parsing; controlled by `AGENT_NL_ROUTING=true`; supports multi-stock and strategy extraction
@@ -481,7 +481,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ### Added
 - 🧠 **Structured config validation** — `ConfigIssue` dataclass and `validate_structured()` with severity-aware logging; `CONFIG_VALIDATE_MODE=strict` aborts startup on errors
 - 🖼️ **Vision model config** — `VISION_MODEL` and `VISION_PROVIDER_PRIORITY` for image stock extraction; provider fallback (Gemini → Anthropic → OpenAI → DeepSeek) when primary fails
-- 🚀 **CLI init wizard** — `python -m dsa init` 3-step interactive bootstrap (model → data source → notification), 9 provider presets, incremental merge by default
+- 🚀 **CLI init wizard** — `python -m finagent init` 3-step interactive bootstrap (model → data source → notification), 9 provider presets, incremental merge by default
 - 🔧 **Multi-channel LLM support** with visual channel editor (#494)
 
 ### Changed
@@ -1116,26 +1116,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   - 核心 API：支持 `/analysis` (触发分析), `/tasks` (查询进度), `/health` (健康检查)
   - 交互界面：支持页面直接输入代码并触发分析，实时展示进度
   - 运行模式：新增 `--webui-only` 模式，仅启动 Web 服务
-  - 解决了 [#70](https://github.com/ZhuLinsen/daily_stock_analysis/issues/70) 的核心需求（提供触发分析的接口）
-- ⚙️ GitHub Actions 配置灵活性增强（[#79](https://github.com/ZhuLinsen/daily_stock_analysis/issues/79)）
+  - 解决了 [#70](https://github.com/helloJamest/FinAgent/issues/70) 的核心需求（提供触发分析的接口）
+- ⚙️ GitHub Actions 配置灵活性增强（[#79](https://github.com/helloJamest/FinAgent/issues/79)）
   - 支持从 Repository Variables 读取非敏感配置（如 STOCK_LIST, GEMINI_MODEL）
   - 保持对 Secrets 的向下兼容
 
 ### 修复
-- 🐛 修复企业微信/飞书报告截断问题（[#73](https://github.com/ZhuLinsen/daily_stock_analysis/issues/73)）
+- 🐛 修复企业微信/飞书报告截断问题（[#73](https://github.com/helloJamest/FinAgent/issues/73)）
   - 移除 notification.py 中不必要的长度硬截断逻辑
   - 依赖底层自动分片机制处理长消息
-- 🐛 修复 GitHub Workflow 环境变量缺失（[#80](https://github.com/ZhuLinsen/daily_stock_analysis/issues/80)）
+- 🐛 修复 GitHub Workflow 环境变量缺失（[#80](https://github.com/helloJamest/FinAgent/issues/80)）
   - 修复 `CUSTOM_WEBHOOK_BEARER_TOKEN` 未正确传递到 Runner 的问题
 
 ## [1.5.0] - 2026-01-17
 
 ### 新增
-- 📲 单股推送模式（[#55](https://github.com/ZhuLinsen/daily_stock_analysis/issues/55)）
+- 📲 单股推送模式（[#55](https://github.com/helloJamest/FinAgent/issues/55)）
   - 每分析完一只股票立即推送，不用等全部分析完
   - 命令行参数：`--single-notify`
   - 环境变量：`SINGLE_STOCK_NOTIFY=true`
-- 🔐 自定义 Webhook Bearer Token 认证（[#51](https://github.com/ZhuLinsen/daily_stock_analysis/issues/51)）
+- 🔐 自定义 Webhook Bearer Token 认证（[#51](https://github.com/helloJamest/FinAgent/issues/51)）
   - 支持需要 Token 认证的 Webhook 端点
   - 环境变量：`CUSTOM_WEBHOOK_BEARER_TOKEN`
 
@@ -1239,50 +1239,50 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ---
 
-[Unreleased]: https://github.com/ZhuLinsen/daily_stock_analysis/compare/v3.11.0...HEAD
-[3.11.0]: https://github.com/ZhuLinsen/daily_stock_analysis/compare/v3.10.1...v3.11.0
-[3.10.1]: https://github.com/ZhuLinsen/daily_stock_analysis/compare/v3.10.0...v3.10.1
-[3.10.0]: https://github.com/ZhuLinsen/daily_stock_analysis/compare/v3.9.0...v3.10.0
-[3.9.0]: https://github.com/ZhuLinsen/daily_stock_analysis/compare/v3.8.0...v3.9.0
-[3.8.0]: https://github.com/ZhuLinsen/daily_stock_analysis/compare/v3.7.0...v3.8.0
-[3.7.0]: https://github.com/ZhuLinsen/daily_stock_analysis/compare/v3.6.0...v3.7.0
-[3.6.0]: https://github.com/ZhuLinsen/daily_stock_analysis/compare/v3.5.0...v3.6.0
-[3.5.0]: https://github.com/ZhuLinsen/daily_stock_analysis/compare/v3.4.10...v3.5.0
-[3.4.10]: https://github.com/ZhuLinsen/daily_stock_analysis/compare/v3.4.9...v3.4.10
-[3.4.9]: https://github.com/ZhuLinsen/daily_stock_analysis/compare/v3.4.8...v3.4.9
-[3.4.8]: https://github.com/ZhuLinsen/daily_stock_analysis/compare/v3.4.7...v3.4.8
-[3.4.7]: https://github.com/ZhuLinsen/daily_stock_analysis/compare/v3.4.0...v3.4.7
-[3.4.0]: https://github.com/ZhuLinsen/daily_stock_analysis/compare/v3.3.22...v3.4.0
-[3.3.22]: https://github.com/ZhuLinsen/daily_stock_analysis/compare/v3.3.12...v3.3.22
-[3.3.12]: https://github.com/ZhuLinsen/daily_stock_analysis/compare/v3.2.11...v3.3.12
-[3.2.11]: https://github.com/ZhuLinsen/daily_stock_analysis/compare/v3.2.10...v3.2.11
-[2.3.0]: https://github.com/ZhuLinsen/daily_stock_analysis/compare/v2.2.5...v2.3.0
-[2.2.5]: https://github.com/ZhuLinsen/daily_stock_analysis/compare/v2.2.4...v2.2.5
-[2.2.4]: https://github.com/ZhuLinsen/daily_stock_analysis/compare/v2.2.3...v2.2.4
-[2.2.3]: https://github.com/ZhuLinsen/daily_stock_analysis/compare/v2.2.2...v2.2.3
-[2.2.2]: https://github.com/ZhuLinsen/daily_stock_analysis/compare/v2.2.1...v2.2.2
-[2.2.1]: https://github.com/ZhuLinsen/daily_stock_analysis/compare/v2.2.0...v2.2.1
-[2.2.0]: https://github.com/ZhuLinsen/daily_stock_analysis/compare/v2.1.14...v2.2.0
-[2.1.14]: https://github.com/ZhuLinsen/daily_stock_analysis/compare/v2.1.13...v2.1.14
-[2.1.13]: https://github.com/ZhuLinsen/daily_stock_analysis/compare/v2.1.12...v2.1.13
-[2.1.12]: https://github.com/ZhuLinsen/daily_stock_analysis/compare/v2.1.11...v2.1.12
-[2.1.11]: https://github.com/ZhuLinsen/daily_stock_analysis/compare/v2.1.10...v2.1.11
-[2.1.10]: https://github.com/ZhuLinsen/daily_stock_analysis/compare/v2.1.9...v2.1.10
-[2.1.9]: https://github.com/ZhuLinsen/daily_stock_analysis/compare/v2.1.8...v2.1.9
-[2.1.8]: https://github.com/ZhuLinsen/daily_stock_analysis/compare/v2.1.7...v2.1.8
-[2.1.7]: https://github.com/ZhuLinsen/daily_stock_analysis/compare/v2.1.6...v2.1.7
-[2.1.6]: https://github.com/ZhuLinsen/daily_stock_analysis/compare/v2.1.5...v2.1.6
-[2.1.5]: https://github.com/ZhuLinsen/daily_stock_analysis/compare/v2.1.4...v2.1.5
-[2.1.4]: https://github.com/ZhuLinsen/daily_stock_analysis/compare/v2.1.3...v2.1.4
-[2.1.3]: https://github.com/ZhuLinsen/daily_stock_analysis/compare/v2.1.2...v2.1.3
-[2.1.2]: https://github.com/ZhuLinsen/daily_stock_analysis/compare/v2.1.1...v2.1.2
-[2.1.1]: https://github.com/ZhuLinsen/daily_stock_analysis/compare/v2.1.0...v2.1.1
-[2.1.0]: https://github.com/ZhuLinsen/daily_stock_analysis/compare/v2.0.0...v2.1.0
-[2.0.0]: https://github.com/ZhuLinsen/daily_stock_analysis/compare/v1.6.0...v2.0.0
-[1.6.0]: https://github.com/ZhuLinsen/daily_stock_analysis/compare/v1.5.0...v1.6.0
-[1.5.0]: https://github.com/ZhuLinsen/daily_stock_analysis/compare/v1.4.0...v1.5.0
-[1.4.0]: https://github.com/ZhuLinsen/daily_stock_analysis/compare/v1.3.0...v1.4.0
-[1.3.0]: https://github.com/ZhuLinsen/daily_stock_analysis/compare/v1.2.0...v1.3.0
-[1.2.0]: https://github.com/ZhuLinsen/daily_stock_analysis/compare/v1.1.0...v1.2.0
-[1.1.0]: https://github.com/ZhuLinsen/daily_stock_analysis/compare/v1.0.0...v1.1.0
-[1.0.0]: https://github.com/ZhuLinsen/daily_stock_analysis/releases/tag/v1.0.0
+[Unreleased]: https://github.com/helloJamest/FinAgent/compare/v3.11.0...HEAD
+[3.11.0]: https://github.com/helloJamest/FinAgent/compare/v3.10.1...v3.11.0
+[3.10.1]: https://github.com/helloJamest/FinAgent/compare/v3.10.0...v3.10.1
+[3.10.0]: https://github.com/helloJamest/FinAgent/compare/v3.9.0...v3.10.0
+[3.9.0]: https://github.com/helloJamest/FinAgent/compare/v3.8.0...v3.9.0
+[3.8.0]: https://github.com/helloJamest/FinAgent/compare/v3.7.0...v3.8.0
+[3.7.0]: https://github.com/helloJamest/FinAgent/compare/v3.6.0...v3.7.0
+[3.6.0]: https://github.com/helloJamest/FinAgent/compare/v3.5.0...v3.6.0
+[3.5.0]: https://github.com/helloJamest/FinAgent/compare/v3.4.10...v3.5.0
+[3.4.10]: https://github.com/helloJamest/FinAgent/compare/v3.4.9...v3.4.10
+[3.4.9]: https://github.com/helloJamest/FinAgent/compare/v3.4.8...v3.4.9
+[3.4.8]: https://github.com/helloJamest/FinAgent/compare/v3.4.7...v3.4.8
+[3.4.7]: https://github.com/helloJamest/FinAgent/compare/v3.4.0...v3.4.7
+[3.4.0]: https://github.com/helloJamest/FinAgent/compare/v3.3.22...v3.4.0
+[3.3.22]: https://github.com/helloJamest/FinAgent/compare/v3.3.12...v3.3.22
+[3.3.12]: https://github.com/helloJamest/FinAgent/compare/v3.2.11...v3.3.12
+[3.2.11]: https://github.com/helloJamest/FinAgent/compare/v3.2.10...v3.2.11
+[2.3.0]: https://github.com/helloJamest/FinAgent/compare/v2.2.5...v2.3.0
+[2.2.5]: https://github.com/helloJamest/FinAgent/compare/v2.2.4...v2.2.5
+[2.2.4]: https://github.com/helloJamest/FinAgent/compare/v2.2.3...v2.2.4
+[2.2.3]: https://github.com/helloJamest/FinAgent/compare/v2.2.2...v2.2.3
+[2.2.2]: https://github.com/helloJamest/FinAgent/compare/v2.2.1...v2.2.2
+[2.2.1]: https://github.com/helloJamest/FinAgent/compare/v2.2.0...v2.2.1
+[2.2.0]: https://github.com/helloJamest/FinAgent/compare/v2.1.14...v2.2.0
+[2.1.14]: https://github.com/helloJamest/FinAgent/compare/v2.1.13...v2.1.14
+[2.1.13]: https://github.com/helloJamest/FinAgent/compare/v2.1.12...v2.1.13
+[2.1.12]: https://github.com/helloJamest/FinAgent/compare/v2.1.11...v2.1.12
+[2.1.11]: https://github.com/helloJamest/FinAgent/compare/v2.1.10...v2.1.11
+[2.1.10]: https://github.com/helloJamest/FinAgent/compare/v2.1.9...v2.1.10
+[2.1.9]: https://github.com/helloJamest/FinAgent/compare/v2.1.8...v2.1.9
+[2.1.8]: https://github.com/helloJamest/FinAgent/compare/v2.1.7...v2.1.8
+[2.1.7]: https://github.com/helloJamest/FinAgent/compare/v2.1.6...v2.1.7
+[2.1.6]: https://github.com/helloJamest/FinAgent/compare/v2.1.5...v2.1.6
+[2.1.5]: https://github.com/helloJamest/FinAgent/compare/v2.1.4...v2.1.5
+[2.1.4]: https://github.com/helloJamest/FinAgent/compare/v2.1.3...v2.1.4
+[2.1.3]: https://github.com/helloJamest/FinAgent/compare/v2.1.2...v2.1.3
+[2.1.2]: https://github.com/helloJamest/FinAgent/compare/v2.1.1...v2.1.2
+[2.1.1]: https://github.com/helloJamest/FinAgent/compare/v2.1.0...v2.1.1
+[2.1.0]: https://github.com/helloJamest/FinAgent/compare/v2.0.0...v2.1.0
+[2.0.0]: https://github.com/helloJamest/FinAgent/compare/v1.6.0...v2.0.0
+[1.6.0]: https://github.com/helloJamest/FinAgent/compare/v1.5.0...v1.6.0
+[1.5.0]: https://github.com/helloJamest/FinAgent/compare/v1.4.0...v1.5.0
+[1.4.0]: https://github.com/helloJamest/FinAgent/compare/v1.3.0...v1.4.0
+[1.3.0]: https://github.com/helloJamest/FinAgent/compare/v1.2.0...v1.3.0
+[1.2.0]: https://github.com/helloJamest/FinAgent/compare/v1.1.0...v1.2.0
+[1.1.0]: https://github.com/helloJamest/FinAgent/compare/v1.0.0...v1.1.0
+[1.0.0]: https://github.com/helloJamest/FinAgent/releases/tag/v1.0.0

@@ -11,7 +11,7 @@ if (Test-Path $devModeKey) {
   }
 }
 
-$skipDevModeCheck = ($env:DSA_SKIP_DEVMODE_CHECK -eq 'true') -or ($env:CI -eq 'true')
+$skipDevModeCheck = ($env:FINAGENT_SKIP_DEVMODE_CHECK -eq 'true') -or ($env:CI -eq 'true')
 if (-not $skipDevModeCheck -and ($allowDev -ne 1) -and ($allowTrusted -ne 1)) {
   Write-Host 'Developer Mode is disabled. Enable it to allow symlink creation for electron-builder.'
   Write-Host 'Windows Settings -> Privacy & security -> For developers -> Developer Mode'
@@ -30,7 +30,7 @@ if (!(Test-Path $backendArtifact)) {
 }
 
 Write-Host 'Building Electron desktop app...'
-Push-Location (Join-Path $repoRoot 'apps\dsa-desktop')
+Push-Location (Join-Path $repoRoot 'apps\finagent-desktop')
 if (!(Test-Path 'node_modules')) {
   npm install
 }

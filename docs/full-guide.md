@@ -7,7 +7,7 @@
 ## 📁 项目结构
 
 ```
-daily_stock_analysis/
+FinAgent/
 ├── main.py              # 主程序入口
 ├── src/                 # 核心业务逻辑
 │   ├── analyzer.py      # AI 分析器
@@ -17,7 +17,7 @@ daily_stock_analysis/
 ├── data_provider/       # 多数据源适配器
 ├── bot/                 # 机器人交互模块
 ├── api/                 # FastAPI 后端服务
-├── apps/dsa-web/        # React 前端
+├── apps/finagent-web/        # React 前端
 ├── docker/              # Docker 配置
 ├── docs/                # 项目文档
 └── .github/workflows/   # GitHub Actions
@@ -85,7 +85,7 @@ daily_stock_analysis/
 | `EMAIL_SENDER` | 发件人邮箱（如 `xxx@qq.com`） | 可选 |
 | `EMAIL_PASSWORD` | 邮箱授权码（非登录密码） | 可选 |
 | `EMAIL_RECEIVERS` | 收件人邮箱（多个用逗号分隔，留空则发给自己） | 可选 |
-| `EMAIL_SENDER_NAME` | 发件人显示名称（默认：daily_stock_analysis股票分析助手） | 可选 |
+| `EMAIL_SENDER_NAME` | 发件人显示名称（默认：FinAgent股票分析助手） | 可选 |
 | `PUSHPLUS_TOKEN` | PushPlus Token（[获取地址](https://www.pushplus.plus)，国内推送服务） | 可选 |
 | `SERVERCHAN3_SENDKEY` | Server酱³ Sendkey（[获取地址](https://sc3.ft07.com/)，手机APP推送服务） | 可选 |
 | `CUSTOM_WEBHOOK_URLS` | 自定义 Webhook（支持钉钉等，多个用逗号分隔） | 可选 |
@@ -126,7 +126,7 @@ daily_stock_analysis/
 | `MINIMAX_API_KEYS` | [MiniMax](https://platform.minimaxi.com/) Coding Plan Web Search（结构化搜索结果） | 可选 |
 | `BOCHA_API_KEYS` | [博查搜索](https://open.bocha.cn/) Web Search API（中文搜索优化，支持AI摘要，多个key用逗号分隔） | 可选 |
 | `BRAVE_API_KEYS` | [Brave Search](https://brave.com/search/api/) API（隐私优先，美股优化，多个key用逗号分隔） | 可选 |
-| `SERPAPI_API_KEYS` | [SerpAPI](https://serpapi.com/baidu-search-api?utm_source=github_daily_stock_analysis) 备用搜索 | 可选 |
+| `SERPAPI_API_KEYS` | [SerpAPI](https://serpapi.com/baidu-search-api?utm_source=github_FinAgent) 备用搜索 | 可选 |
 | `SEARXNG_BASE_URLS` | SearXNG 自建实例（无配额兜底，需在 settings.yml 启用 format: json）；留空时默认自动发现公共实例 | 可选 |
 | `SEARXNG_PUBLIC_INSTANCES_ENABLED` | 是否在 `SEARXNG_BASE_URLS` 为空时自动从 `searx.space` 获取公共实例（默认 `true`） | 可选 |
 | `TUSHARE_TOKEN` | [Tushare Pro](https://tushare.pro/weborder/#/login?reg=834638 ) Token | 可选 |
@@ -341,14 +341,14 @@ daily_stock_analysis/
 
 Dockerfile 使用多阶段构建，前端会在构建镜像时自动打包并内置到 `static/`。
 如需覆盖静态资源，可挂载本地 `static/` 到容器内 `/app/static`。
-运行中的 `server` 容器默认直接复用 `/app/static` 里的预构建产物，不要求容器内保留 `apps/dsa-web` 源码目录或运行时安装 `npm`；若 WebUI 无法打开，请优先确认 `/app/static/index.html` 是否存在。
+运行中的 `server` 容器默认直接复用 `/app/static` 里的预构建产物，不要求容器内保留 `apps/finagent-web` 源码目录或运行时安装 `npm`；若 WebUI 无法打开，请优先确认 `/app/static/index.html` 是否存在。
 
 ### 快速启动
 
 ```bash
 # 1. 克隆仓库
-git clone https://github.com/ZhuLinsen/daily_stock_analysis.git
-cd daily_stock_analysis
+git clone https://github.com/helloJamest/FinAgent.git
+cd FinAgent
 
 # 2. 配置环境变量
 cp .env.example .env
@@ -1069,7 +1069,7 @@ A: 检查是否启用了 Actions，以及 cron 表达式是否正确（注意是
 
 ---
 
-更多问题请 [提交 Issue](https://github.com/ZhuLinsen/daily_stock_analysis/issues)
+更多问题请 [提交 Issue](https://github.com/helloJamest/FinAgent/issues)
 
 ## Portfolio P0 PR1 (Core Ledger and Snapshot)
 
@@ -1127,7 +1127,7 @@ A: 检查是否启用了 Actions，以及 cron 表达式是否正确（注意是
 ## Portfolio P0 PR3 (Web + Agent Consumption)
 
 ### Web consumption page
-- Added Web page route: `/portfolio` (`apps/dsa-web/src/pages/PortfolioPage.tsx`).
+- Added Web page route: `/portfolio` (`apps/finagent-web/src/pages/PortfolioPage.tsx`).
 - Data sources:
   - `GET /api/v1/portfolio/snapshot`
   - `GET /api/v1/portfolio/risk`

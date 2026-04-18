@@ -1,9 +1,9 @@
 import { expect, test, type Page } from '@playwright/test';
 
-const smokePassword = process.env.DSA_WEB_SMOKE_PASSWORD;
+const smokePassword = process.env.FINAGENT_WEB_SMOKE_PASSWORD;
 
 async function login(page: Page) {
-  test.skip(!smokePassword, 'Set DSA_WEB_SMOKE_PASSWORD to run authenticated smoke tests.');
+  test.skip(!smokePassword, 'Set FINAGENT_WEB_SMOKE_PASSWORD to run authenticated smoke tests.');
 
   await page.goto('/login');
   await page.waitForLoadState('domcontentloaded');
@@ -44,7 +44,7 @@ test.describe('web smoke', () => {
     await page.waitForLoadState('domcontentloaded');
 
     // Check for branding
-    await expect(page.getByText('DAILY STOCK').first()).toBeVisible();
+    await expect(page.getByText('DAILY').first()).toBeVisible();
     await expect(page.getByText('Analysis Engine')).toBeVisible();
 
     // Check for password input

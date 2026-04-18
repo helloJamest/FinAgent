@@ -59,7 +59,7 @@ class EmailSender:
         """
         self._email_config = {
             'sender': config.email_sender,
-            'sender_name': getattr(config, 'email_sender_name', 'daily_stock_analysis股票分析助手'),
+            'sender_name': getattr(config, 'email_sender_name', 'FinAgent股票分析助手'),
             'password': config.email_password,
             'receivers': config.email_receivers or ([config.email_sender] if config.email_sender else []),
         }

@@ -7,7 +7,7 @@ Input:
   - Tushare format: data/stock_list_{a,hk,us}.csv
   - AkShare format: logs/stock_basic_*.csv
 
-Output: apps/dsa-web/public/stocks.index.json
+Output: apps/finagent-web/public/stocks.index.json
 
 Usage:
     python3 scripts/generate_index_from_csv.py              # 默认使用 Tushare
@@ -596,7 +596,7 @@ def main():
 
     # 输出路径
     output_path = (
-        Path(__file__).parent.parent / "apps" / "dsa-web" / "public" / "stocks.index.json"
+        Path(__file__).parent.parent / "apps" / "finagent-web" / "public" / "stocks.index.json"
     )
     output_path.parent.mkdir(parents=True, exist_ok=True)
 

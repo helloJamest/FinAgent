@@ -15,7 +15,7 @@ if [[ ! -d "${ROOT_DIR}/dist/backend/stock_analysis" ]]; then
   exit 1
 fi
 
-pushd "${ROOT_DIR}/apps/dsa-desktop" >/dev/null
+pushd "${ROOT_DIR}/apps/finagent-desktop" >/dev/null
 if [[ ! -d node_modules ]]; then
   npm install
 fi
@@ -25,7 +25,7 @@ if compgen -G "dist/mac*" >/dev/null; then
   rm -rf dist/mac*
 fi
 
-MAC_ARCH="${DSA_MAC_ARCH:-}"
+MAC_ARCH="${FINAGENT_MAC_ARCH:-}"
 ARCH_ARGS=()
 if [[ -n "${MAC_ARCH}" ]]; then
   case "${MAC_ARCH}" in
@@ -33,7 +33,7 @@ if [[ -n "${MAC_ARCH}" ]]; then
       ARCH_ARGS+=("--${MAC_ARCH}")
       ;;
     *)
-      echo "Unsupported DSA_MAC_ARCH: ${MAC_ARCH}. Use x64 or arm64."
+      echo "Unsupported FINAGENT_MAC_ARCH: ${MAC_ARCH}. Use x64 or arm64."
       exit 1
       ;;
   esac

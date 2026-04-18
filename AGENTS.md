@@ -8,8 +8,8 @@
 
 - 遵循现有目录边界：
   - 后端逻辑优先放在 `src/`、`data_provider/`、`api/`、`bot/`
-  - Web 前端改动在 `apps/dsa-web/`
-  - 桌面端改动在 `apps/dsa-desktop/`
+  - Web 前端改动在 `apps/finagent-web/`
+  - 桌面端改动在 `apps/finagent-desktop/`
   - 部署与流水线改动在 `scripts/`、`.github/workflows/`、`docker/`
 - 未经明确确认，不执行 `git commit`、`git tag`、`git push`。
 - commit message 使用英文，不添加 `Co-Authored-By`。
@@ -45,8 +45,8 @@ python scripts/check_ai_assets.py
 - 关键入口：
   - `main.py`：分析任务主入口
   - `server.py`：FastAPI 服务入口
-  - `apps/dsa-web/`：Web 前端
-  - `apps/dsa-desktop/`：Electron 桌面端
+  - `apps/finagent-web/`：Web 前端
+  - `apps/finagent-desktop/`：Electron 桌面端
   - `.github/workflows/`：CI、发布、每日任务
 - 核心职责：
   - `src/core/`：主流程编排
@@ -91,12 +91,12 @@ python -m py_compile <changed_python_files>
 ### Web / Desktop
 
 ```bash
-cd apps/dsa-web
+cd apps/finagent-web
 npm ci
 npm run lint
 npm run build
 
-cd ../dsa-desktop
+cd ../finagent-desktop
 npm install
 npm run build
 ```
@@ -152,17 +152,17 @@ gh run view <run_id> --log-failed
   - 若影响 API、任务编排、报告生成、通知发送、数据源 fallback、认证、调度，交付说明中要写明是否覆盖了对应路径。
 
 - Web 前端改动：
-  - 适用范围：`apps/dsa-web/`
-  - 默认执行：`cd apps/dsa-web && npm ci && npm run lint && npm run build`
+  - 适用范围：`apps/finagent-web/`
+  - 默认执行：`cd apps/finagent-web && npm ci && npm run lint && npm run build`
   - 若涉及 API 联调、路由、状态管理、Markdown/图表渲染或认证状态，交付说明中要明确说明联动面和未覆盖风险。
 
 - 桌面端改动：
-  - 适用范围：`apps/dsa-desktop/`、`scripts/run-desktop.ps1`、`scripts/build-desktop*.ps1`、`scripts/build-*.sh`、`docs/desktop-package.md`
+  - 适用范围：`apps/finagent-desktop/`、`scripts/run-desktop.ps1`、`scripts/build-desktop*.ps1`、`scripts/build-*.sh`、`docs/desktop-package.md`
   - 默认执行：先构建 Web，再构建桌面端
   - 如受平台限制未能完整验证，需要明确说明是否验证了 Web 构建产物、Electron 构建以及 Release 工作流影响。
 
 - API / Schema / 认证联动改动：
-  - 适用范围：`api/**`、`src/schemas/**`、`src/services/**`、`apps/dsa-web/**`、`apps/dsa-desktop/**`
+  - 适用范围：`api/**`、`src/schemas/**`、`src/services/**`、`apps/finagent-web/**`、`apps/finagent-desktop/**`
   - 至少覆盖对应后端验证 + 受影响客户端构建验证。
   - 若涉及登录、Cookie、会话、轮询状态、字段增删或枚举变化，必须明确写出兼容性影响。
 

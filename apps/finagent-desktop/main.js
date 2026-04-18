@@ -33,8 +33,8 @@ function resolveAppDir() {
 }
 
 function resolveBackendPath() {
-  if (process.env.DSA_BACKEND_PATH) {
-    return process.env.DSA_BACKEND_PATH;
+  if (process.env.FINAGENT_BACKEND_PATH) {
+    return process.env.FINAGENT_BACKEND_PATH;
   }
 
   if (app.isPackaged) {
@@ -86,7 +86,7 @@ function formatCommand(command, args = []) {
 }
 
 function resolvePythonPath() {
-  return process.env.DSA_PYTHON || 'python';
+  return process.env.FINAGENT_PYTHON || 'python';
 }
 
 function ensureEnvFile(envPath) {
@@ -290,7 +290,7 @@ function startBackend({ port, envFile, dbPath, logDir }) {
 
   const env = {
     ...process.env,
-    DSA_DESKTOP_MODE: 'true',
+    FINAGENT_DESKTOP_MODE: 'true',
     ENV_FILE: envFile,
     DATABASE_PATH: dbPath,
     LOG_DIR: logDir,

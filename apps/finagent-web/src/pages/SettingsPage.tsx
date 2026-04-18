@@ -20,7 +20,7 @@ import { getCategoryDescriptionZh } from '../utils/systemConfigI18n';
 import type { SystemConfigCategory } from '../types/systemConfig';
 
 type DesktopWindow = Window & {
-  dsaDesktop?: {
+  finagentDesktop?: {
     version?: string;
   };
 };
@@ -30,7 +30,7 @@ function formatDesktopEnvFilename() {
   const pad = (value: number) => value.toString().padStart(2, '0');
   const date = `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}`;
   const time = `${pad(now.getHours())}${pad(now.getMinutes())}`;
-  return `dsa-desktop-env_${date}_${time}.env`;
+  return `finagent-desktop-env_${date}_${time}.env`;
 }
 
 const SettingsPage: React.FC = () => {
@@ -41,11 +41,11 @@ const SettingsPage: React.FC = () => {
   const [isImportingEnv, setIsImportingEnv] = useState(false);
   const [showImportConfirm, setShowImportConfirm] = useState(false);
   const desktopImportRef = useRef<HTMLInputElement | null>(null);
-  const isDesktopRuntime = typeof window !== 'undefined' && Boolean((window as DesktopWindow).dsaDesktop);
+  const isDesktopRuntime = typeof window !== 'undefined' && Boolean((window as DesktopWindow).finagentDesktop);
 
   // Set page title
   useEffect(() => {
-    document.title = '系统设置 - DSA';
+    document.title = '系统设置 - FinAgent';
   }, []);
 
   const {

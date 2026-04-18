@@ -2,16 +2,16 @@
 
 # AI Stock Analysis System
 
-[![GitHub stars](https://img.shields.io/github/stars/ZhuLinsen/daily_stock_analysis?style=social)](https://github.com/ZhuLinsen/daily_stock_analysis/stargazers)
-[![CI](https://github.com/ZhuLinsen/daily_stock_analysis/actions/workflows/ci.yml/badge.svg)](https://github.com/ZhuLinsen/daily_stock_analysis/actions/workflows/ci.yml)
+[![GitHub stars](https://img.shields.io/github/stars/helloJamest/FinAgent?style=social)](https://github.com/helloJamest/FinAgent/stargazers)
+[![CI](https://github.com/helloJamest/FinAgent/actions/workflows/ci.yml/badge.svg)](https://github.com/helloJamest/FinAgent/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![GitHub Actions](https://img.shields.io/badge/GitHub%20Actions-Ready-2088FF?logo=github-actions&logoColor=white)](https://github.com/features/actions)
 [![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?logo=docker&logoColor=white)](https://hub.docker.com/)
 
 <p>
-  <a href="https://trendshift.io/repositories/18527" target="_blank"><img src="https://trendshift.io/api/badge/repositories/18527" alt="ZhuLinsen%2Fdaily_stock_analysis | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
-  <a href="https://hellogithub.com/repository/ZhuLinsen/daily_stock_analysis" target="_blank"><img src="https://api.hellogithub.com/v1/widgets/recommend.svg?rid=6daa16e405ce46ed97b4a57706aeb29f&claim_uid=pfiJMqhR9uvDGlT&theme=neutral" alt="Featured｜HelloGitHub" style="width: 250px; height: 54px;" width="250" height="54" /></a>
+  <a href="https://trendshift.io/repositories/18527" target="_blank"><img src="https://trendshift.io/api/badge/repositories/18527" alt="helloJamest%2FFinAgent | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
+  <a href="https://hellogithub.com/repository/helloJamest/FinAgent" target="_blank"><img src="https://api.hellogithub.com/v1/widgets/recommend.svg?rid=6daa16e405ce46ed97b4a57706aeb29f&claim_uid=pfiJMqhR9uvDGlT&theme=neutral" alt="Featured｜HelloGitHub" style="width: 250px; height: 54px;" width="250" height="54" /></a>
 </p>
 
 **AI-powered stock analysis system for A-shares / Hong Kong / US stocks**
@@ -29,7 +29,7 @@ English | [简体中文](../README.md) | [繁體中文](README_CHT.md)
 ## 💖 Sponsors
 
 <div align="center">
-  <a href="https://serpapi.com/baidu-search-api?utm_source=github_daily_stock_analysis" target="_blank">
+  <a href="https://serpapi.com/baidu-search-api?utm_source=github_FinAgent" target="_blank">
     <img src="../sources/serpapi_banner_en.png" alt="Easily scrape real-time financial news data from search engines - SerpApi" height="160">
   </a>
 </div>
@@ -141,7 +141,7 @@ Go to your forked repo → `Settings` → `Secrets and variables` → `Actions` 
 | `ANSPIRE_API_KEYS` | [Anspire AI Search](https://aisearch.anspire.cn/) Specially optimized for Chinese content (effectively enhances A-share analysis) | Optional |
 | `MINIMAX_API_KEYS` | [MiniMax](https://platform.minimaxi.com/) Coding Plan Web Search (structured search results) | Optional |
 | `BRAVE_API_KEYS` | [Brave Search](https://brave.com/search/api/) API (privacy-focused, US stocks optimized) | Optional |
-| `SERPAPI_API_KEYS` | [SerpAPI](https://serpapi.com/baidu-search-api?utm_source=github_daily_stock_analysis) Backup search | Optional |
+| `SERPAPI_API_KEYS` | [SerpAPI](https://serpapi.com/baidu-search-api?utm_source=github_FinAgent) Backup search | Optional |
 | `BOCHA_API_KEYS` | [Bocha Search](https://open.bocha.cn/) Web Search API (Chinese search optimized, supports AI summaries, multiple keys comma-separated) | Optional |
 | `SEARXNG_BASE_URLS` | SearXNG self-hosted instances (quota-free fallback, enable format: json in settings.yml); when empty the app auto-discovers public instances | Optional |
 | `SEARXNG_PUBLIC_INSTANCES_ENABLED` | Auto-discover public SearXNG instances from `searx.space` when `SEARXNG_BASE_URLS` is empty (default `true`) | Optional |
@@ -198,8 +198,8 @@ The system will:
 #### 1. Clone Repository
 
 ```bash
-git clone https://github.com/ZhuLinsen/daily_stock_analysis.git
-cd daily_stock_analysis
+git clone https://github.com/helloJamest/FinAgent.git
+cd FinAgent
 ```
 
 #### 2. Install Dependencies
@@ -540,11 +540,11 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 **Made with ❤️ by AI enthusiasts | Star ⭐ this repo if you find it useful!**
 
 
-<a href="https://star-history.com/#ZhuLinsen/daily_stock_analysis&Date">
+<a href="https://star-history.com/#helloJamest/FinAgent&Date">
  <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=ZhuLinsen/daily_stock_analysis&type=Date&theme=dark" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=ZhuLinsen/daily_stock_analysis&type=Date" />
-   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=ZhuLinsen/daily_stock_analysis&type=Date" />
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=helloJamest/FinAgent&type=Date&theme=dark" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=helloJamest/FinAgent&type=Date" />
+   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=helloJamest/FinAgent&type=Date" />
  </picture>
 </a>
 
@@ -572,8 +572,8 @@ The developers of this tool are not liable for any financial losses resulting fr
 
 ## 📞 Contact
 
-- GitHub Issues: [Report bugs or request features](https://github.com/ZhuLinsen/daily_stock_analysis/issues)
-- Discussions: [Join discussions](https://github.com/ZhuLinsen/daily_stock_analysis/discussions)
+- GitHub Issues: [Report bugs or request features](https://github.com/helloJamest/FinAgent/issues)
+- Discussions: [Join discussions](https://github.com/helloJamest/FinAgent/discussions)
 - Email: zhuls345@gmail.com
 
 ----

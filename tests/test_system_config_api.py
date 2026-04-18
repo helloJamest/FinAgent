@@ -45,7 +45,7 @@ class SystemConfigApiTestCase(unittest.TestCase):
             encoding="utf-8",
         )
         os.environ["ENV_FILE"] = str(self.env_path)
-        os.environ["DSA_DESKTOP_MODE"] = "true"
+        os.environ["FINAGENT_DESKTOP_MODE"] = "true"
         Config.reset_instance()
 
         self.manager = ConfigManager(env_path=self.env_path)
@@ -53,7 +53,7 @@ class SystemConfigApiTestCase(unittest.TestCase):
 
     def tearDown(self) -> None:
         Config.reset_instance()
-        os.environ.pop("DSA_DESKTOP_MODE", None)
+        os.environ.pop("FINAGENT_DESKTOP_MODE", None)
         os.environ.pop("ENV_FILE", None)
         self.temp_dir.cleanup()
 
@@ -242,7 +242,7 @@ class SystemConfigApiTestCase(unittest.TestCase):
         self.assertEqual(context.exception.detail["error"], "invalid_import_file")
 
     def test_desktop_env_endpoints_return_forbidden_outside_desktop_mode(self) -> None:
-        os.environ["DSA_DESKTOP_MODE"] = "false"
+        os.environ["FINAGENT_DESKTOP_MODE"] = "false"
         current = system_config.get_system_config(include_schema=False, service=self.service).model_dump()
 
         with self.assertRaises(HTTPException) as export_context:

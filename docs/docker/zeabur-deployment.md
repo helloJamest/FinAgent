@@ -60,7 +60,7 @@ Zeabur 会自动检测 `.github/workflows/docker-publish.yml` 文件，并使用
 ### 2.4 前端构建与静态资源
 
 FastAPI 会自动托管 `static/` 目录下的前端资源。前端打包输出位置由
-`apps/dsa-web/vite.config.ts` 决定，默认输出到项目根目录 `static/`。
+`apps/finagent-web/vite.config.ts` 决定，默认输出到项目根目录 `static/`。
 
 Dockerfile 已采用多阶段构建，前端会在镜像构建时自动打包。
 如需覆盖默认静态资源，可在宿主机手动构建并挂载到容器内 `/app/static`。

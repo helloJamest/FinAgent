@@ -4,7 +4,7 @@
 Stock Index Generation Script
 
 Generate stock index file for frontend autocomplete functionality
-Output to apps/dsa-web/public/stocks.index.json
+Output to apps/finagent-web/public/stocks.index.json
 
 Two-phase strategy:
 1. MVP: Use existing STOCK_NAME_MAP
@@ -309,7 +309,7 @@ def main():
         return 0
 
     # 输出路径
-    output_path = Path(__file__).parent.parent / "apps" / "dsa-web" / "public" / "stocks.index.json"
+    output_path = Path(__file__).parent.parent / "apps" / "finagent-web" / "public" / "stocks.index.json"
     output_path.parent.mkdir(parents=True, exist_ok=True)
 
     # 写入文件

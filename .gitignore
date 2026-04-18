@@ -79,5 +79,5 @@ verify_*.py
 
 # ignore static files
 static/
-/apps/dsa-desktop/dist/
-/apps/dsa-desktop/node_modules/
+/apps/finagent-desktop/dist/
+/apps/finagent-desktop/node_modules/

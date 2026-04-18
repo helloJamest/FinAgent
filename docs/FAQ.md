@@ -20,7 +20,7 @@
    ```
    这将优先使用 Yahoo Finance 数据源获取美股数据
 
-> 📌 相关 Issue: [#153](https://github.com/ZhuLinsen/daily_stock_analysis/issues/153)
+> 📌 相关 Issue: [#153](https://github.com/helloJamest/FinAgent/issues/153)
 
 ---
 
@@ -38,7 +38,7 @@
    ```
 3. 系统已内置 5 日均量计算作为兜底逻辑
 
-> 📌 相关 Issue: [#155](https://github.com/ZhuLinsen/daily_stock_analysis/issues/155)
+> 📌 相关 Issue: [#155](https://github.com/helloJamest/FinAgent/issues/155)
 
 ---
 
@@ -313,7 +313,7 @@ OPENAI_MODEL=deepseek-chat
 
 2. **改用 host 网络模式**：若上述仍无效，可在 `server` 服务下添加 `network_mode: host`，并移除 `ports` 映射。使用 host 模式时，`ports` 无效，**端口由 `command` 中的 `--port` 指定**。若宿主机默认端口已占用，可修改为其他端口（如 `.env` 中设置 `API_PORT=8080`），访问对应 `http://localhost:8080`。
 
-> 📌 相关 Issue: [#372](https://github.com/ZhuLinsen/daily_stock_analysis/issues/372)
+> 📌 相关 Issue: [#372](https://github.com/helloJamest/FinAgent/issues/372)
 
 ---
 
@@ -363,7 +363,7 @@ python main.py --market-only
 
 如果以上内容没有解决你的问题，欢迎：
 1. 查看 [完整配置指南](full-guide.md)
-2. 搜索或提交 [GitHub Issue](https://github.com/ZhuLinsen/daily_stock_analysis/issues)
+2. 搜索或提交 [GitHub Issue](https://github.com/helloJamest/FinAgent/issues)
 3. 查看 [更新日志](CHANGELOG.md) 了解最新修复
 
 ---

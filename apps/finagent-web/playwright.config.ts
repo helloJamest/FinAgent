@@ -7,8 +7,8 @@ const currentDir = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(currentDir, '../..');
 
 function resolveBackendCommand() {
-  if (process.env.DSA_WEB_SMOKE_BACKEND_CMD) {
-    return process.env.DSA_WEB_SMOKE_BACKEND_CMD;
+  if (process.env.FINAGENT_WEB_SMOKE_BACKEND_CMD) {
+    return process.env.FINAGENT_WEB_SMOKE_BACKEND_CMD;
   }
 
   const unixVenvPython = path.join(repoRoot, '.venv', 'bin', 'python');

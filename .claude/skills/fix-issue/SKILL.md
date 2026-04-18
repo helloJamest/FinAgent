@@ -2,7 +2,7 @@
 
 基于 issue 分析结果实现修复，并按仓库规则补齐验证、风险与回滚说明。
 
-**Repository**: https://github.com/ZhuLinsen/daily_stock_analysis
+**Repository**: https://github.com/helloJamest/FinAgent
 
 ## Usage
 
@@ -43,7 +43,7 @@
 
 - 后端优先：`./scripts/ci_gate.sh`
 - 最低后端要求：`python -m py_compile <changed_python_files>`
-- 前端：`cd apps/dsa-web && npm ci && npm run lint && npm run build`
+- 前端：`cd apps/finagent-web && npm ci && npm run lint && npm run build`
 - 桌面端：先构建 Web，再构建桌面端
 
 如无法完成完整验证，必须记录缺口、原因与潜在风险。

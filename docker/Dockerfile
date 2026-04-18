@@ -5,12 +5,12 @@
 
 FROM node:20-slim AS web-builder
 
-WORKDIR /app/apps/dsa-web
+WORKDIR /app/apps/finagent-web
 
-COPY apps/dsa-web/package.json apps/dsa-web/package-lock.json ./
+COPY apps/finagent-web/package.json apps/finagent-web/package-lock.json ./
 RUN npm ci
 
-COPY apps/dsa-web/ ./
+COPY apps/finagent-web/ ./
 RUN npm run build
 
 # Pin to bookworm: wkhtmltopdf was removed from Debian testing (2025)

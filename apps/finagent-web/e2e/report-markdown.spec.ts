@@ -1,9 +1,9 @@
 import { expect, test, type Page } from '@playwright/test';
 
-const smokePassword = process.env.DSA_WEB_SMOKE_PASSWORD;
+const smokePassword = process.env.FINAGENT_WEB_SMOKE_PASSWORD;
 
 async function login(page: Page) {
-  test.skip(!smokePassword, 'Set DSA_WEB_SMOKE_PASSWORD to run report markdown tests.');
+  test.skip(!smokePassword, 'Set FINAGENT_WEB_SMOKE_PASSWORD to run report markdown tests.');
 
   // Navigate to login page
   await page.goto('/login');

@@ -319,7 +319,7 @@ deploy:
   ```bash
   # 安装 Node.js 18+（推荐 20+，如尚未安装）
   # 构建前端
-  cd apps/dsa-web
+  cd apps/finagent-web
   npm ci
   npm run build
   cd ../..
@@ -371,14 +371,14 @@ docker-compose -f ./docker/docker-compose.yml up -d
 
 ```bash
 # 初始化 git（如果还没有）
-cd /path/to/daily_stock_analysis
+cd /path/to/FinAgent
 git init
 git add .
 git commit -m "Initial commit"
 
 # 创建 GitHub 仓库并推送
 # 在 GitHub 网页上创建新仓库后：
-git remote add origin https://github.com/你的用户名/daily_stock_analysis.git
+git remote add origin https://github.com/你的用户名/FinAgent.git
 git branch -M main
 git push -u origin main
 ```

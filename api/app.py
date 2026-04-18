@@ -61,7 +61,7 @@ def create_app(static_dir: Optional[Path] = None) -> FastAPI:
     
     # 创建 FastAPI 实例
     app = FastAPI(
-        title="Daily Stock Analysis API",
+        title="FinAgent API",
         description=(
             "A股/港股/美股自选股智能分析系统 API\n\n"
             "## 功能模块\n"
@@ -128,7 +128,7 @@ def create_app(static_dir: Optional[Path] = None) -> FastAPI:
     else:
         _FRONTEND_NOT_BUILT_HTML = """<!DOCTYPE html>
 <html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>DSA - Frontend Not Built</title>
+<title>FinAgent - Frontend Not Built</title>
 <style>
   *{margin:0;padding:0;box-sizing:border-box}
   body{min-height:100vh;display:flex;align-items:center;justify-content:center;
@@ -146,7 +146,7 @@ def create_app(static_dir: Optional[Path] = None) -> FastAPI:
 <h1>&#9888;&#65039; Frontend Not Built</h1>
 <p>API is running, but the Web UI has not been built yet.</p>
 <p>Build the frontend first:</p>
-<p><code>cd apps/dsa-web &amp;&amp; npm install &amp;&amp; npm run build</code></p>
+<p><code>cd apps/finagent-web &amp;&amp; npm install &amp;&amp; npm run build</code></p>
 <p>Or start with auto-build:</p>
 <p><code>python main.py --serve-only</code></p>
 <div class="hint"><p>If you only need the API, visit <a href="/docs">/docs</a> for the interactive API documentation.</p></div>

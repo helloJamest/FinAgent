@@ -2,7 +2,7 @@
 
 分析 GitHub Issue，判断其真实性、优先级、仓库责任边界与建议动作。
 
-**Repository**: https://github.com/ZhuLinsen/daily_stock_analysis/issues
+**Repository**: https://github.com/helloJamest/FinAgent/issues
 
 ## Usage
 
@@ -17,8 +17,8 @@
 ### Step 1: 拉取 Issue 信息
 
 ```bash
-gh issue view <issue_number> --repo ZhuLinsen/daily_stock_analysis
-gh issue view <issue_number> --repo ZhuLinsen/daily_stock_analysis --comments
+gh issue view <issue_number> --repo helloJamest/FinAgent
+gh issue view <issue_number> --repo helloJamest/FinAgent --comments
 ```
 
 如为 bug，优先核对 issue 模板中是否提供了以下信息：

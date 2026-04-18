@@ -6,7 +6,7 @@ from pathlib import Path
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-DESKTOP_DIR = REPO_ROOT / "apps" / "dsa-desktop"
+DESKTOP_DIR = REPO_ROOT / "apps" / "finagent-desktop"
 
 
 def test_windows_nsis_build_allows_custom_install_directory() -> None:

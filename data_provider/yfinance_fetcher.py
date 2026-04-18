@@ -392,7 +392,7 @@ class YfinanceFetcher(BaseFetcher):
         request = Request(
             url,
             headers={
-                "User-Agent": "Mozilla/5.0 (compatible; DSA/1.0; +https://github.com/ZhuLinsen/daily_stock_analysis)",
+                "User-Agent": "Mozilla/5.0 (compatible; FinAgent/1.0; +https://github.com/helloJamest/FinAgent)",
                 "Accept": "text/plain,text/csv,*/*",
             },
         )
@@ -413,7 +413,7 @@ class YfinanceFetcher(BaseFetcher):
             history_request = Request(
                 history_url,
                 headers={
-                    "User-Agent": "Mozilla/5.0 (compatible; DSA/1.0; +https://github.com/ZhuLinsen/daily_stock_analysis)",
+                    "User-Agent": "Mozilla/5.0 (compatible; FinAgent/1.0; +https://github.com/helloJamest/FinAgent)",
                     "Accept": "text/plain,text/csv,*/*",
                 },
             )

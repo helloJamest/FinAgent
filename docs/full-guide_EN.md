@@ -7,7 +7,7 @@ This document contains the complete configuration guide for the AI Stock Analysi
 ## Project Structure
 
 ```
-daily_stock_analysis/
+FinAgent/
 ├── main.py              # Main entry point
 ├── src/                 # Core business logic
 │   ├── analyzer.py      # AI analyzer
@@ -17,7 +17,7 @@ daily_stock_analysis/
 ├── data_provider/       # Multi-source data adapters
 ├── bot/                 # Bot interaction module
 ├── api/                 # FastAPI backend service
-├── apps/dsa-web/        # React frontend
+├── apps/finagent-web/        # React frontend
 ├── docker/              # Docker configuration
 ├── docs/                # Project documentation
 └── .github/workflows/   # GitHub Actions
@@ -120,7 +120,7 @@ Go to your forked repo → `Settings` → `Secrets and variables` → `Actions` 
 | `ANSPIRE_API_KEYS` | [Anspire AI Search](https://aisearch.anspire.cn/) Specially optimized for Chinese content (effectively enhances A-share analysis) | Optional |
 | `MINIMAX_API_KEYS` | [MiniMax](https://platform.minimaxi.com/) Coding Plan Web Search (structured search results) | Optional |
 | `BOCHA_API_KEYS` | [Bocha Search](https://open.bocha.cn/) Web Search API (Chinese search optimized, supports AI summaries, multiple keys comma-separated) | Optional |
-| `SERPAPI_API_KEYS` | [SerpAPI](https://serpapi.com/baidu-search-api?utm_source=github_daily_stock_analysis) Backup search | Optional |
+| `SERPAPI_API_KEYS` | [SerpAPI](https://serpapi.com/baidu-search-api?utm_source=github_FinAgent) Backup search | Optional |
 | `SEARXNG_BASE_URLS` | SearXNG self-hosted instances (quota-free fallback, enable format: json in settings.yml); when empty the app auto-discovers public instances | Optional |
 | `SEARXNG_PUBLIC_INSTANCES_ENABLED` | Auto-discover public SearXNG instances from `searx.space` when `SEARXNG_BASE_URLS` is empty (default `true`) | Optional |
 | `TUSHARE_TOKEN` | [Tushare Pro](https://tushare.pro/weborder/#/login?reg=834638) Token | Optional |
@@ -306,14 +306,14 @@ Default schedule: Every weekday at **18:00 (Beijing Time)** automatic execution.
 
 ## Docker Deployment
 
-The image uses prebuilt frontend assets under `/app/static` at runtime, so the running `server` container does not require the `apps/dsa-web` source tree or runtime `npm`. If WebUI cannot be opened after Docker deployment, first verify that `/app/static/index.html` exists inside the container.
+The image uses prebuilt frontend assets under `/app/static` at runtime, so the running `server` container does not require the `apps/finagent-web` source tree or runtime `npm`. If WebUI cannot be opened after Docker deployment, first verify that `/app/static/index.html` exists inside the container.
 
 ### Quick Start
 
 ```bash
 # 1. Clone repository
-git clone https://github.com/ZhuLinsen/daily_stock_analysis.git
-cd daily_stock_analysis
+git clone https://github.com/helloJamest/FinAgent.git
+cd FinAgent
 
 # 2. Configure environment variables
 cp .env.example .env
@@ -910,4 +910,4 @@ A: Check if Actions is enabled, and if cron expression is correct (note it's UTC
 
 ---
 
-For more questions, please [submit an Issue](https://github.com/ZhuLinsen/daily_stock_analysis/issues)
+For more questions, please [submit an Issue](https://github.com/helloJamest/FinAgent/issues)

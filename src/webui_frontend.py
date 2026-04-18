@@ -177,7 +177,7 @@ def prepare_webui_frontend_assets() -> bool:
     - Do not compile frontend during backend startup.
     - Only check whether existing artifacts are available.
     """
-    frontend_dir = Path(__file__).resolve().parent.parent / "apps" / "dsa-web"
+    frontend_dir = Path(__file__).resolve().parent.parent / "apps" / "finagent-web"
     auto_build_enabled = _is_truthy_env("WEBUI_AUTO_BUILD", "true")
     artifact_index = _resolve_artifact_index(frontend_dir)
 

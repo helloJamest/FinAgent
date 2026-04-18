@@ -7,7 +7,7 @@
 #   FastAPI模式: docker-compose -f ./docker/docker-compose.yml up -d server
 #   同时启动: docker-compose -f ./docker/docker-compose.yml up -d analyzer server
 
-name: daily-stock-analysis
+name: finagent
 version: '3.8'
 
 x-common: &common

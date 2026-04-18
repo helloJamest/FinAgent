@@ -24,7 +24,7 @@ from dotenv import dotenv_values
 
 logger = logging.getLogger(__name__)
 
-COOKIE_NAME = "dsa_session"
+COOKIE_NAME = "finagent_session"
 PBKDF2_ITERATIONS = 100_000
 RATE_LIMIT_WINDOW_SEC = 300
 RATE_LIMIT_MAX_FAILURES = 5
