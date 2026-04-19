@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import json
 import logging
+import re
 import time
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional
@@ -215,12 +216,21 @@ class DebateOrchestrator:
             episode_store=self.episode_store,
             debate_tracker=self.debate_tracker,
         )
+
+        if progress_callback:
+            progress_callback({"type": "stage_start", "stage": "debate", "message": "Starting multi-agent debate..."})
+
+        debate_t0 = time.time()
         debate_result = arena.debate(
             ctx,
             technical_opinion=technical_opinion,
             intel_opinion=intel_opinion,
             risk_opinion=risk_opinion,
         )
+        debate_duration = round(time.time() - debate_t0, 2)
+
+        if progress_callback:
+            progress_callback({"type": "stage_done", "stage": "debate", "status": "completed" if debate_result.success else "failed", "duration": debate_duration})
 
         elapsed_s = time.time() - t0
         stats.total_duration_s = round(elapsed_s, 2)

@@ -12,10 +12,9 @@ from __future__ import annotations
 
 import logging
 import time
-from typing import Any, Dict, List, Optional, TYPE_CHECKING
+from typing import Any, Dict, List, Optional
 
-if TYPE_CHECKING:
-    from src.agent.debate.debate_protocols import Argument, DebateRound, Rebuttal
+from src.agent.debate.debate_protocols import Argument, DebateRound, Rebuttal
 
 logger = logging.getLogger(__name__)
 
@@ -131,13 +130,13 @@ class AdvocateAgent:
                 {"role": "user", "content": user_message},
             ]
 
-            response = self.llm_adapter.chat(
+            response = self.llm_adapter.call_text(
                 messages=messages,
                 temperature=0.7,
                 max_tokens=2048,
             )
 
-            content = response.get("content", "") if isinstance(response, dict) else ""
+            content = response.content or ""
             parsed = self._parse_json(content)
 
             if parsed:
@@ -189,13 +188,13 @@ class AdvocateAgent:
                 {"role": "user", "content": instruction},
             ]
 
-            response = self.llm_adapter.chat(
+            response = self.llm_adapter.call_text(
                 messages=messages,
                 temperature=0.7,
                 max_tokens=2048,
             )
 
-            content = response.get("content", "") if isinstance(response, dict) else ""
+            content = response.content or ""
             parsed = self._parse_json(content)
 
             if parsed:

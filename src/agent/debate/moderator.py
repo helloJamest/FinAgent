@@ -112,14 +112,14 @@ class DebateModerator:
                 {"role": "user", "content": user_message},
             ]
 
-            response = self.llm_adapter.chat(
+            response = self.llm_adapter.call_text(
                 messages=messages,
                 temperature=0.3,
                 max_tokens=4096,
             )
 
-            content = response.get("content", "") if isinstance(response, dict) else ""
-            tokens_used = response.get("tokens_used", 0) if isinstance(response, dict) else 0
+            content = response.content or ""
+            tokens_used = response.usage.get("total_tokens", 0) if response.usage else 0
 
             # Parse JSON from response
             parsed = self._parse_json(content)
