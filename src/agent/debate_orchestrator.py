@@ -252,21 +252,21 @@ class DebateOrchestrator:
                 debate_result=debate_result,
             )
 
-        # Step 5: Build final output
+        # Step 5: Synthesize via DecisionAgent for readable output
         dashboard = debate_result.dashboard
-        content = ""
         if dashboard:
-            content = json.dumps(dashboard, ensure_ascii=False, indent=2)
             ctx.set_data("final_dashboard", dashboard)
-        elif debate_result.final_reasoning:
-            content = debate_result.final_reasoning
+
+        # Run DecisionAgent to synthesize debate result into natural language (chat)
+        # or structured dashboard (non-chat), matching standard mode behavior.
+        decision_content = self._run_decision_synthesis(ctx, debate_result)
 
         return DebateOrchestratorResult(
-            success=bool(content),
-            content=content,
+            success=bool(decision_content),
+            content=decision_content,
             dashboard=dashboard,
             tool_calls_log=all_tool_calls,
-            total_steps=stats.total_stages + debate_result.rounds_completed,
+            total_steps=stats.total_stages + debate_result.rounds_completed + 1,
             total_tokens=stats.total_tokens + debate_result.tokens_used,
             provider=stats.models_used[0] if stats.models_used else "",
             model=", ".join(dict.fromkeys(models_used)),
@@ -360,6 +360,90 @@ class DebateOrchestrator:
     # -----------------------------------------------------------------
     # Result builders
     # -----------------------------------------------------------------
+
+    def _run_decision_synthesis(
+        self,
+        ctx: AgentContext,
+        debate_result: Any,
+    ) -> str:
+        """Run DecisionAgent to synthesize the debate result into readable output.
+
+        Mirrors what the standard orchestrator does: in chat mode the DecisionAgent
+        generates natural language; in non-chat mode it produces structured JSON.
+        """
+        from src.agent.agents.decision_agent import DecisionAgent
+        from src.agent.runner import parse_dashboard_json
+
+        decision_agent = DecisionAgent(
+            tool_registry=self.tool_registry,
+            llm_adapter=self.llm_adapter,
+            skill_instructions=self.skill_instructions,
+            technical_skill_policy=self.technical_skill_policy,
+        )
+
+        # Inject debate result into context so DecisionAgent can see it
+        debate_summary = {
+            "final_signal": debate_result.final_signal,
+            "final_confidence": debate_result.final_confidence,
+            "final_reasoning": debate_result.final_reasoning,
+            "rounds_completed": debate_result.rounds_completed,
+            "consensus_reached": debate_result.consensus_reached,
+            "convergence_round": debate_result.convergence_round,
+            "dashboard": debate_result.dashboard or {},
+        }
+        ctx.set_data("debate_result", debate_summary)
+
+        # Add debate opinions to ctx.opinions list (DecisionAgent reads these)
+        for advocate_name in ("bull_advocate", "bear_advocate"):
+            if ctx.opinions:
+                break  # already has opinions from technical/intel/risk stages
+        if not ctx.opinions:
+            # Create synthetic opinions from debate rounds
+            if debate_result.all_rounds:
+                r1 = debate_result.all_rounds[0]
+                if r1.bull_argument:
+                    ctx.opinions.append(
+                        AgentOpinion(
+                            agent_name="bull_advocate",
+                            signal=r1.bull_argument.signal,
+                            confidence=r1.bull_argument.confidence,
+                            reasoning=r1.bull_argument.reasoning,
+                            key_evidence=r1.bull_argument.key_evidence,
+                        )
+                    )
+                if r1.bear_argument:
+                    ctx.opinions.append(
+                        AgentOpinion(
+                            agent_name="bear_advocate",
+                            signal=r1.bear_argument.signal,
+                            confidence=r1.bear_argument.confidence,
+                            reasoning=r1.bear_argument.reasoning,
+                            key_evidence=r1.bear_argument.key_evidence,
+                        )
+                    )
+
+        if ctx.meta.get("response_mode") == "chat":
+            try:
+                result = decision_agent.run(ctx, progress_callback=None)
+                if result.success:
+                    # DecisionAgent stores chat response in ctx.data["final_response_text"]
+                    response = ctx.data.get("final_response_text", "")
+                    if response and response.strip():
+                        return response.strip()
+                    # Fallback to raw_text from meta
+                    raw_text = result.meta.get("raw_text", "")
+                    if raw_text and raw_text.strip():
+                        return raw_text.strip()
+            except Exception as exc:
+                logger.warning("[DebateOrchestrator] DecisionAgent synthesis failed: %s", exc)
+
+        # Non-chat mode or fallback: use the dashboard JSON directly
+        dashboard = debate_result.dashboard
+        if dashboard:
+            return json.dumps(dashboard, ensure_ascii=False, indent=2)
+        if debate_result.final_reasoning:
+            return debate_result.final_reasoning
+        return ""
 
     @staticmethod
     def _failure_result(stats, tool_calls, models, t0, error: str) -> DebateOrchestratorResult:
