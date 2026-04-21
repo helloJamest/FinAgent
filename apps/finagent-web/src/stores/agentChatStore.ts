@@ -21,6 +21,9 @@ export interface ProgressStep {
   duration?: number;
   message?: string;
   content?: string;
+  stage?: string;
+  status?: string;
+  debate_stage?: string;
 }
 
 export interface Message {

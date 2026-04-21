@@ -15,7 +15,7 @@ from __future__ import annotations
 
 import logging
 import time
-from typing import Any, Dict, List, Optional, TYPE_CHECKING
+from typing import Any, Callable, Dict, List, Optional, TYPE_CHECKING
 
 from src.agent.debate.advocate_agent import AdvocateAgent
 from src.agent.debate.debate_protocols import (
@@ -82,6 +82,8 @@ class DebateArena:
         technical_opinion: Optional["AgentOpinion"] = None,
         intel_opinion: Optional["AgentOpinion"] = None,
         risk_opinion: Optional["AgentOpinion"] = None,
+        progress_callback: Optional[Callable[[Dict[str, Any]], None]] = None,
+        timeout: Optional[float] = None,
     ) -> DebateResult:
         """Run a structured debate and return the result."""
         t0 = time.time()
@@ -111,9 +113,14 @@ class DebateArena:
             state.stock_code, state.stock_name, self.max_rounds,
         )
 
+        # Compute per-step timeout: divide remaining budget across expected calls
+        # ~7 LLM calls total: bull_argue, bear_argue, (bull_rebut, bear_rebut) * 2, moderate
+        estimated_calls = 2 + (self.max_rounds - 1) * 2 + 1
+        per_call_timeout = (timeout / estimated_calls) if timeout else None
+
         # Round 1: Initial arguments
-        bull_arg = self.bull_advocate.argue(context_data, state.stock_code, state.stock_name)
-        bear_arg = self.bear_advocate.argue(context_data, state.stock_code, state.stock_name)
+        bull_arg = self.bull_advocate.argue(context_data, state.stock_code, state.stock_name, progress_callback=progress_callback, timeout=per_call_timeout)
+        bear_arg = self.bear_advocate.argue(context_data, state.stock_code, state.stock_name, progress_callback=progress_callback, timeout=per_call_timeout)
 
         round1 = DebateRound(
             round_number=1,
@@ -132,7 +139,7 @@ class DebateArena:
         if self._check_signal_convergence(state.rounds):
             logger.info("[DebateArena] converged after Round 1")
             state.concluded = True
-            return self._finalize(state, t0, total_tokens, converged=True)
+            return self._finalize(state, t0, total_tokens, converged=True, progress_callback=progress_callback, timeout=per_call_timeout)
 
         # Rounds 2+: Rebuttals
         for round_num in range(2, self.max_rounds + 1):
@@ -146,6 +153,8 @@ class DebateArena:
                 opponent_argument=prev_round.bear_argument,
                 your_previous=prev_round.bull_argument,
                 risk_comments=risk_comment,
+                progress_callback=progress_callback,
+                timeout=per_call_timeout,
             )
 
             # Bear rebuts Bull
@@ -153,6 +162,8 @@ class DebateArena:
                 opponent_argument=prev_round.bull_argument,
                 your_previous=prev_round.bear_argument,
                 risk_comments=risk_comment,
+                progress_callback=progress_callback,
+                timeout=per_call_timeout,
             )
 
             current_round = DebateRound(
@@ -198,11 +209,11 @@ class DebateArena:
             if self._check_signal_convergence(state.rounds):
                 logger.info("[DebateArena] converged after Round %d", round_num)
                 state.concluded = True
-                return self._finalize(state, t0, total_tokens, converged=True)
+                return self._finalize(state, t0, total_tokens, converged=True, progress_callback=progress_callback)
 
         # Max rounds reached without convergence
         logger.info("[DebateArena] max rounds reached without convergence")
-        return self._finalize(state, t0, total_tokens, converged=False)
+        return self._finalize(state, t0, total_tokens, converged=False, progress_callback=progress_callback)
 
     # -----------------------------------------------------------------
     # Internal helpers
@@ -248,7 +259,7 @@ class DebateArena:
                 desc = flag.get("description", "")
                 parts.append(f"[{severity}] {desc}")
 
-        return "\n".join(parts) if parts else "No significant risk flags identified."
+        return "\n".join(parts) if parts else "未发现显著风险信号。"
 
     def _collect_context_data(
         self,
@@ -291,9 +302,11 @@ class DebateArena:
         start_time: float,
         total_tokens: int,
         converged: bool,
+        progress_callback: Optional[Callable[[Dict[str, Any]], None]] = None,
+        timeout: Optional[float] = None,
     ) -> DebateResult:
         """Run moderation and return final result."""
-        result = self.moderator.moderate(state)
+        result = self.moderator.moderate(state, progress_callback=progress_callback, timeout=timeout)
         result.duration_s = round(time.time() - start_time, 2)
         result.tokens_used += total_tokens
         result.consensus_reached = converged
@@ -379,9 +392,9 @@ class DebateArena:
         if not skills:
             return ""
 
-        parts = ["\n## Learned Skills from Past Analysis"]
-        parts.append("The following are lessons learned from past prediction errors. ")
-        parts.append("Consider these when forming your arguments.\n")
+        parts = ["\n## 历史经验教训"]
+        parts.append("以下是从过去的预测错误中吸取的教训。")
+        parts.append("在形成论点时请考虑这些经验。\n")
         for i, skill in enumerate(skills, 1):
             parts.append(f"### Skill {i}: {skill.skill_name}")
             parts.append(f"**Description**: {skill.description}")

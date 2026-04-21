@@ -191,6 +191,9 @@ class DebateOrchestrator:
         all_tool_calls.extend(intel_result.meta.get("tool_calls_log", []))
         models_used.extend(intel_result.meta.get("models_used", []))
 
+        if not intel_result.success:
+            return self._failure_result(stats, all_tool_calls, models_used, t0, f"Intel analysis failed: {intel_result.error or 'unknown error'}")
+
         elapsed_s = time.time() - t0
         if timeout_s and elapsed_s >= timeout_s:
             return self._timeout_result(stats, all_tool_calls, models_used, t0, timeout_s, ctx, parse_dashboard)
@@ -221,11 +224,14 @@ class DebateOrchestrator:
             progress_callback({"type": "stage_start", "stage": "debate", "message": "Starting multi-agent debate..."})
 
         debate_t0 = time.time()
+        remaining_timeout = max(0.0, timeout_s - (time.time() - t0)) if timeout_s else None
         debate_result = arena.debate(
             ctx,
             technical_opinion=technical_opinion,
             intel_opinion=intel_opinion,
             risk_opinion=risk_opinion,
+            progress_callback=progress_callback,
+            timeout=remaining_timeout,
         )
         debate_duration = round(time.time() - debate_t0, 2)
 

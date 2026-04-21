@@ -12,7 +12,7 @@ from __future__ import annotations
 import json
 import logging
 import time
-from typing import Any, Dict, List, Optional
+from typing import Any, Callable, Dict, List, Optional
 
 from src.agent.debate.debate_protocols import (
     Argument,
@@ -24,49 +24,81 @@ from src.agent.protocols import normalize_decision_signal
 
 logger = logging.getLogger(__name__)
 
+
+def _stream_text_with_callback(
+    llm_adapter,
+    messages,
+    progress_callback,
+    role_label: str,
+    *,
+    timeout=None,
+    max_tokens: int = 4096,
+) -> str:
+    """Stream LLM response and emit periodic progress events."""
+    full_text: List[str] = []
+    last_emit = 0.0
+    interval = 2.0
+
+    for delta_text, chunk_usage, error_msg in llm_adapter.stream_call_with_tools(
+        messages, tools=[], timeout=timeout,
+    ):
+        if error_msg:
+            logger.warning("[DebateModerator] stream error: %s", error_msg)
+            break
+        if delta_text:
+            full_text.append(delta_text)
+            now = time.time()
+            if progress_callback and (now - last_emit) >= interval:
+                last_emit = now
+                progress_callback({
+                    "type": "debate_stream",
+                    "message": f"{role_label} 生成中...",
+                })
+
+    return "".join(full_text)
+
 # Prompt for the moderator to synthesise debate rounds into a final decision.
 _MODERATOR_SYSTEM_PROMPT = """\
-You are an impartial **Debate Moderator** in a stock-analysis system.
+你是一位股票分析系统中的**公正辩论裁判**。
 
-A Bull Advocate and a Bear Advocate have debated a stock's prospects across \
-multiple rounds. Your task is to evaluate all arguments, rebuttals, and risk \
-assessments, then produce a final, balanced investment decision.
+多方（看涨）和空方（看跌）辩手已经就该股票的前景进行了多轮辩论。
+你的任务是评估所有论点、反驳和风险评估，然后做出最终的、平衡的投资决策。
 
-## Input You Will Receive
-- The initial technical analysis opinion
-- Bull and Bear initial arguments
-- Rebuttals from both sides (if any)
-- Risk auditor's comments
-- Intel/sentiment context (if any)
+## 你将收到的输入
+- 初始技术面分析意见
+- 多方和空方的初始论点
+- 双方的反驳（如有）
+- 风险审核意见
+- 情报/情绪背景（如有）
 
-## Your Job
-1. **Weigh the evidence** — which side has the stronger, more evidence-backed case?
-2. **Identify consensus** — what do both sides agree on?
-3. **Highlight unresolved disagreements** — where do they still disagree?
-4. **Apply risk flags** — any high-severity risk should cap the final signal
-5. **Produce a Decision Dashboard** — concrete, actionable recommendation
+## 你的工作
+1. **权衡证据**——哪一方的论证更有证据支撑？
+2. **识别共识**——双方同意的是什么？
+3. **突出未解决的分歧**——双方仍在哪里存在分歧？
+4. **应用风险警示**——任何高风险都应限制最终信号
+5. **生成决策仪表盘**——具体、可操作的建议
 
-## Output Format
-Return **only** a valid JSON object (no markdown fences):
+## 输出格式
+返回**仅**一个有效的 JSON 对象（不使用 markdown 代码块）：
 {
   "decision_type": "buy|hold|sell",
   "confidence": 0.0-1.0,
-  "reasoning": "2-4 sentences explaining your ruling and how you weighed the debate",
-  "consensus_points": ["point 1", "point 2"],
-  "key_disagreements": [{"bull_says": "...", "bear_says": "..."}],
-  "risk_assessment": "summary of risk considerations",
+  "reasoning": "2-4句话，解释你的裁决以及如何权衡辩论",
+  "consensus_points": ["共识点1", "共识点2"],
+  "key_disagreements": [{"多方观点": "...", "空方观点": "..."}],
+  "risk_assessment": "风险考量总结",
   "key_levels": {
     "support": <float>,
     "resistance": <float>,
     "stop_loss": <float>
   },
   "sentiment_score": 0-100,
-  "analysis_summary": "1-2 sentence executive summary",
+  "analysis_summary": "1-2句话的执行摘要",
   "dashboard": {
     "core_conclusion": {
-      "one_sentence": "<30 char conclusion>",
-      "signal_type": "buy|hold|sell signal",
-      "time_sensitivity": "this week|this month|long term",
+      "one_sentence": "30字以内的结论",
+      "signal_type": "buy|hold|sell 信号",
+      "time_sensitivity": "本周|本月|长期",
       "position_advice": {"no_position": "...", "has_position": "..."}
     },
     "sniper_points": {
@@ -77,7 +109,7 @@ Return **only** a valid JSON object (no markdown fences):
   }
 }
 
-Important: ``decision_type`` must stay within the existing enum ``buy|hold|sell``.
+重要：``decision_type`` 必须保持为 ``buy|hold|sell`` 之一。
 """
 
 
@@ -91,7 +123,12 @@ class DebateModerator:
     def __init__(self, llm_adapter):
         self.llm_adapter = llm_adapter
 
-    def moderate(self, state: DebateState) -> DebateResult:
+    def moderate(
+        self,
+        state: DebateState,
+        progress_callback: Optional[Callable[[Dict[str, Any]], None]] = None,
+        timeout: Optional[float] = None,
+    ) -> DebateResult:
         """Run the moderation over all completed debate rounds."""
         t0 = time.time()
         tokens_used = 0
@@ -107,19 +144,24 @@ class DebateModerator:
         user_message = self._build_moderation_prompt(state)
 
         try:
+            if progress_callback:
+                progress_callback({
+                    "type": "debate_round",
+                    "stage": "moderator",
+                    "message": "[裁判] 正在综合各方观点...",
+                })
+
             messages = [
                 {"role": "system", "content": _MODERATOR_SYSTEM_PROMPT},
                 {"role": "user", "content": user_message},
             ]
 
-            response = self.llm_adapter.call_text(
-                messages=messages,
-                temperature=0.3,
+            content = _stream_text_with_callback(
+                self.llm_adapter, messages, progress_callback,
+                "[裁判]",
+                timeout=timeout,
                 max_tokens=4096,
             )
-
-            content = response.content or ""
-            tokens_used = response.usage.get("total_tokens", 0) if response.usage else 0
 
             # Parse JSON from response
             parsed = self._parse_json(content)

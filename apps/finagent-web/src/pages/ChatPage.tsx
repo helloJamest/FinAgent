@@ -352,6 +352,12 @@ const ChatPage: React.FC = () => {
       return `${last.display_name || last.tool} 完成`;
     if (last.type === 'generating')
       return last.message || '正在生成最终分析...';
+    if (last.type === 'debate_round')
+      return last.message || '辩论分析中...';
+    if (last.type === 'debate_stream')
+      return last.message || '辩论生成中...';
+    if (last.type === 'stage_start')
+      return last.message || '处理中...';
     return '处理中...';
   };
 
@@ -414,6 +420,22 @@ const ChatPage: React.FC = () => {
           text = step.message || '生成分析';
           statusClass = 'chat-progress-item-generating';
           iconClass = 'chat-progress-dot-generating';
+        } else if (step.type === 'debate_round') {
+          text = step.message || '辩论分析中';
+          statusClass = 'chat-progress-item-thinking';
+          iconClass = 'chat-progress-dot-thinking';
+        } else if (step.type === 'debate_stream') {
+          text = step.message || '辩论生成中';
+          statusClass = 'chat-progress-item-thinking';
+          iconClass = 'chat-progress-dot-thinking';
+        } else if (step.type === 'stage_start') {
+          text = step.message || '开始新阶段';
+          statusClass = 'chat-progress-item-thinking';
+          iconClass = 'chat-progress-dot-thinking';
+        } else if (step.type === 'stage_done') {
+          text = `${step.message || step.stage} (${step.duration?.toFixed(1) || '?'}s)`;
+          statusClass = step.status === 'failed' ? 'chat-progress-item-danger' : 'chat-progress-item-success';
+          iconClass = step.status === 'failed' ? 'chat-progress-dot-danger' : 'chat-progress-dot-success';
         }
         return (
           <div
