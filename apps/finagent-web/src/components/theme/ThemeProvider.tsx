@@ -11,7 +11,7 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
       attribute="class"
       defaultTheme="dark"
       enableSystem
-      disableTransitionOnChange
+      disableTransitionOnChange={false}
     >
       {children}
     </NextThemesProvider>

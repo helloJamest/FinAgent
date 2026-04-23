@@ -59,7 +59,7 @@ export const Card: React.FC<CardProps> = ({
   return (
     <div
       style={style}
-      className={cn('rounded-2xl', variantStyles[variant], hoverStyles, paddingStyles[padding], className)}
+      className={cn('rounded-[var(--radius)]', variantStyles[variant], hoverStyles, paddingStyles[padding], className)}
     >
       {(title || subtitle) && (
         <div className="mb-3">

@@ -11,7 +11,7 @@
 4. 可选 LLM 深度分析生成策略建议
 
 数据源：AKShare 东方财富接口
-- stock_lhb_hyyyb_em: 龙虎榜游资营业部数据
+- stock_lhb_stock_statistic_em: 龙虎榜个股统计数据
 - stock_zt_pool_em: 涨停池
 - stock_zt_pool_previous_em: 昨日涨停池
 - stock_zt_concept_em: 涨停概念板块
@@ -20,7 +20,7 @@
 
 import asyncio
 import logging
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import List, Dict, Any, Optional, Callable
 
 from src.screener.schemas import ScreenerCandidate, ScreenerStrategy
@@ -65,13 +65,16 @@ class BoardDataFetcher:
         time.sleep(delay)
 
     def _row_val(self, row: Any, key: str, default: Any = None) -> Any:
-        """Safely get a value from a row, handling both dict-like and Series."""
+        """Safely get a value from a row dict or pandas Series."""
         if row is None:
             return default
-        if key in row:
-            val = row[key]
-            return default if val is None else val
-        return default
+        if hasattr(row, "get"):
+            # dict-like (including pandas Series which has .get())
+            val = row.get(key, default)
+        else:
+            # fallback: attribute access
+            val = getattr(row, key, default)
+        return default if val is None else val
 
     def get_lhb_data(
         self, start_date: str, end_date: str
@@ -89,12 +92,13 @@ class BoardDataFetcher:
         try:
             self._safe_sleep()
             ak = self._get_ak()
-            df = ak.stock_lhb_hyyyb_em(start_date=start_date, end_date=end_date)
+            df = ak.stock_lhb_stock_statistic_em(start_date=start_date, end_date=end_date)
             if df is None or df.empty:
                 return []
 
             # Log actual columns for debugging if API changes
             logger.info(f"龙虎榜数据列: {list(df.columns)}")
+            logger.info(f"龙虎榜数据: {df.shape}")
 
             results = []
             for _, row in df.iterrows():
@@ -248,9 +252,10 @@ class BoardDataFetcher:
     def get_all_board_data(
         self, trade_date: Optional[str] = None
     ) -> Dict[str, Any]:
-        """一次性获取所有打板数据（串行，避免并发被封）"""
+        """一次性获取所有打板数据（串行，避免并发被封 IP）"""
         if trade_date is None:
-            trade_date = datetime.now().strftime("%Y%m%d")
+            # 默认使用上一交易日，避免盘中数据不完整
+            trade_date = (datetime.now() - timedelta(days=1)).strftime("%Y%m%d")
         trade_date = trade_date.replace("-", "")
 
         result: Dict[str, Any] = {
@@ -317,7 +322,7 @@ class BoardScreener(BaseScreener):
         progress_callback: Optional[Callable[[int, str], None]] = None,
     ) -> List[ScreenerCandidate]:
         """执行打板筛选"""
-        trade_date = datetime.now().strftime("%Y%m%d")
+        trade_date = (datetime.now() - timedelta(days=1)).strftime("%Y%m%d")
 
         if progress_callback:
             progress_callback(5, "正在获取龙虎榜、涨停池、连板天梯数据...")

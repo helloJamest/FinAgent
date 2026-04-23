@@ -137,7 +137,8 @@ export const Input = ({
           style={inputStyle}
           data-appearance={appearance}
           className={cn(
-            'input-surface input-focus-glow h-11 w-full rounded-xl border bg-transparent px-4 text-sm transition-all',
+            'input-surface input-focus-glow h-11 w-full border bg-transparent px-4 text-sm transition-all',
+            'rounded-[var(--radius)]',
             'focus:outline-none',
             isLoginAppearance ? 'input-appearance-login' : '',
             error ? 'border-danger/30' : '',
