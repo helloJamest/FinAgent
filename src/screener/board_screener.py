@@ -246,7 +246,7 @@ class BoardDataFetcher:
 
             # 从涨停池数据中按所属题材聚合
             sector_col = None
-            for col_name in ["所属题材", "板块", "概念"]:
+            for col_name in ["所属题材", "所属行业", "板块", "概念"]:
                 if col_name in df.columns:
                     sector_col = col_name
                     break
