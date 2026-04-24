@@ -80,23 +80,18 @@ class BoardDataFetcher:
         self, start_date: str, end_date: str
     ) -> List[Dict[str, Any]]:
         """
-        获取龙虎榜数据（游资营业部维度）
+        获取龙虎榜数据（个股统计维度）
 
-        Args:
-            start_date: YYYYMMDD
-            end_date: YYYYMMDD
-
-        Returns:
-            龙虎榜条目列表，每个包含代码/名称/上榜理由/买卖金额等
+        使用 stock_lhb_stock_statistic_em，按时间段聚合龙虎榜个股数据。
+        symbol: 近一月/近三月/近六月/近一年
         """
         try:
             self._safe_sleep()
             ak = self._get_ak()
-            df = ak.stock_lhb_stock_statistic_em(start_date=start_date, end_date=end_date)
+            df = ak.stock_lhb_stock_statistic_em(symbol="近一月")
             if df is None or df.empty:
                 return []
 
-            # Log actual columns for debugging if API changes
             logger.info(f"龙虎榜数据列: {list(df.columns)}")
             logger.info(f"龙虎榜数据: {df.shape}")
 
@@ -108,21 +103,85 @@ class BoardDataFetcher:
                 name = self._row_val(row, "名称", "")
                 if not code or not name:
                     continue
+                buy_amt = _safe_float(self._row_val(row, "龙虎榜买入额", 0))
+                sell_amt = _safe_float(self._row_val(row, "龙虎榜卖出额", 0))
+                net_amt = _safe_float(self._row_val(row, "龙虎榜净买额", 0))
+                inst_buy_count = _safe_int(self._row_val(row, "买方机构次数", 0))
+                inst_sell_count = _safe_int(self._row_val(row, "卖方机构次数", 0))
+                lhb_freq = _safe_int(self._row_val(row, "上榜次数", 0))
+                change_1m = _safe_float(self._row_val(row, "近1个月涨跌幅", 0))
+                total_lhb = _safe_float(self._row_val(row, "龙虎榜总成交额", 0))
+
+                # Build reason string based on data
+                reason_parts = []
+                if lhb_freq > 0:
+                    reason_parts.append(f"近1月上榜 {lhb_freq} 次")
+                if inst_buy_count > 0:
+                    reason_parts.append(f"机构买入 {inst_buy_count} 次")
+                if inst_sell_count > 0:
+                    reason_parts.append(f"机构卖出 {inst_sell_count} 次")
+                if net_amt > 0:
+                    reason_parts.append(f"龙虎榜净买入 {net_amt / 1e8:.2f} 亿")
+                elif net_amt < 0:
+                    reason_parts.append(f"龙虎榜净卖出 {abs(net_amt) / 1e8:.2f} 亿")
+                if change_1m != 0:
+                    direction = "涨" if change_1m > 0 else "跌"
+                    reason_parts.append(f"近1月{direction} {abs(change_1m):.1f}%")
+
+                reason = "龙虎榜 | " + " | ".join(reason_parts) if reason_parts else "龙虎榜上榜"
+
                 results.append({
                     "code": str(code).strip(),
                     "name": str(name).strip(),
-                    "reason": str(self._row_val(row, "上榜理由", "")),
-                    "buy_amount": _safe_float(self._row_val(row, "买入金额", 0)),
-                    "sell_amount": _safe_float(self._row_val(row, "卖出金额", 0)),
-                    "net_amount": _safe_float(self._row_val(row, "净额", 0)),
+                    "reason": reason,
+                    "buy_amount": buy_amt,
+                    "sell_amount": sell_amt,
+                    "net_amount": net_amt,
                     "close": _safe_float(self._row_val(row, "收盘价", 0)),
                     "change_pct": _safe_float(self._row_val(row, "涨跌幅", 0)),
                     "turnover_rate": _safe_float(self._row_val(row, "换手率", 0)),
+                    "lhb_frequency": lhb_freq,
+                    "lhb_total_amount": total_lhb,
+                    "inst_buy_count": inst_buy_count,
+                    "inst_sell_count": inst_sell_count,
+                    "change_1m": change_1m,
+                    "change_3m": _safe_float(self._row_val(row, "近3个月涨跌幅", 0)),
+                    "risk_tags": self._build_lhb_risk_tags(
+                        net_amt=net_amt,
+                        inst_buy_count=inst_buy_count,
+                        inst_sell_count=inst_sell_count,
+                        lhb_freq=lhb_freq,
+                        change_1m=change_1m,
+                    ),
                 })
             return results
         except Exception as e:
             logger.warning(f"获取龙虎榜数据失败: {e}")
             return []
+
+    def _build_lhb_risk_tags(
+        self,
+        net_amt: float,
+        inst_buy_count: int,
+        inst_sell_count: int,
+        lhb_freq: int,
+        change_1m: float,
+    ) -> List[str]:
+        """根据龙虎榜数据构建风险标签"""
+        tags: List[str] = []
+        if net_amt < -1e8:
+            tags.append("大额净卖出")
+        if inst_sell_count > inst_buy_count:
+            tags.append("机构净卖出")
+        if inst_buy_count > 0 and inst_sell_count > 0:
+            tags.append("机构分歧")
+        if lhb_freq >= 10:
+            tags.append("频繁上榜")
+        if change_1m > 50:
+            tags.append("短期涨幅过大")
+        if change_1m < -20:
+            tags.append("短期跌幅较大")
+        return tags
 
     def get_limit_up_pool(self, trade_date: str) -> List[Dict[str, Any]]:
         """获取当日涨停池"""
@@ -177,25 +236,45 @@ class BoardDataFetcher:
             return []
 
     def get_zt_concepts(self) -> List[Dict[str, Any]]:
-        """获取涨停概念/板块，按公司家数降序"""
+        """获取涨停概念/板块，按涨停公司家数降序"""
         try:
             self._safe_sleep()
             ak = self._get_ak()
-            # stock_zt_concept_em 不存在，使用 stock_board_concept_summary_ths 替代
-            df = ak.stock_board_concept_summary_ths()
+            df = ak.stock_zt_pool_em(date=(datetime.now() - timedelta(days=1)).strftime("%Y%m%d"))
             if df is None or df.empty:
                 return []
-            results = []
+
+            # 从涨停池数据中按所属题材聚合
+            sector_col = None
+            for col_name in ["所属题材", "板块", "概念"]:
+                if col_name in df.columns:
+                    sector_col = col_name
+                    break
+
+            if sector_col is None:
+                return []
+
+            sector_groups = {}
             for _, row in df.iterrows():
-                leader_name = str(row.get("领涨股票", "")).strip()
+                sector = str(row.get(sector_col, "")).strip()
+                if not sector:
+                    continue
+                if sector not in sector_groups:
+                    sector_groups[sector] = []
+                sector_groups[sector].append(row)
+
+            results = []
+            for sector_name, stocks in sector_groups.items():
+                first = stocks[0]
                 results.append({
-                    "sector_name": str(row.get("板块名称", "")).strip(),
-                    "limit_up_count": _safe_int(row.get("成分公司数量", 0)),
-                    "leader_code": "",  # ths 接口不提供领涨代码
-                    "leader_name": leader_name,
-                    "change_pct": 0.0,  # ths 接口不提供板块涨跌幅
-                    "turnover_rate": _safe_float(row.get("换手率", 0)),
+                    "sector_name": sector_name,
+                    "limit_up_count": len(stocks),
+                    "leader_code": str(first.get("代码", "")),
+                    "leader_name": str(first.get("名称", "")),
+                    "change_pct": _safe_float(first.get("涨跌幅", 0)),
+                    "turnover_rate": _safe_float(first.get("换手率", 0)),
                 })
+
             results.sort(key=lambda x: x["limit_up_count"], reverse=True)
             return results
         except Exception as e:
@@ -215,22 +294,40 @@ class BoardDataFetcher:
             df = ak.stock_zt_pool_strong_em(date=trade_date)
             if df is None or df.empty:
                 return {}
+            logger.info(f"连板天梯数据列: {list(df.columns)}")
+            logger.info(f"连板天梯数据: {df.shape}")
             chain_groups: Dict[str, List[Dict[str, Any]]] = {}
+
+            # 涨停统计格式: '连板数/天数' 如 '3/3' 表示3连板
             for _, row in df.iterrows():
-                consecutive = _safe_int(row.get("连板数", 1))
-                stock = {
-                    "code": str(row.get("代码", "")).strip(),
-                    "name": str(row.get("名称", "")).strip(),
-                    "close": _safe_float(row.get("收盘价", 0)),
-                    "change_pct": _safe_float(row.get("涨跌幅", 0)),
-                    "consecutive_days": consecutive,
-                    "limit_up_time": str(row.get("首次封板时间", "")),
-                    "turnover_rate": _safe_float(row.get("换手率", 0)),
-                    "volume_ratio": _safe_float(row.get("量比", 0)),
-                    "sector": str(row.get("所属题材", row.get("板块", ""))),
-                }
-                if not stock["code"] or not stock["name"]:
+                code = str(self._row_val(row, "代码", "")).strip()
+                name = str(self._row_val(row, "名称", "")).strip()
+                if not code or not name:
                     continue
+
+                # Parse consecutive days from 涨停统计 column
+                consecutive = 1
+                ts_val = self._row_val(row, "涨停统计", "")
+                if ts_val and "/" in str(ts_val):
+                    try:
+                        consecutive = int(str(ts_val).split("/")[0])
+                    except (ValueError, IndexError):
+                        consecutive = 1
+
+                sector = str(self._row_val(row, "入选理由", ""))
+                industry = str(self._row_val(row, "所属行业", ""))
+
+                stock = {
+                    "code": code,
+                    "name": name,
+                    "close": _safe_float(self._row_val(row, "最新价", 0)),
+                    "change_pct": _safe_float(self._row_val(row, "涨跌幅", 0)),
+                    "consecutive_days": consecutive,
+                    "turnover_rate": _safe_float(self._row_val(row, "换手率", 0)),
+                    "volume_ratio": _safe_float(self._row_val(row, "量比", 0)),
+                    "sector": sector or industry or "",
+                    "limit_up_stat": str(ts_val),
+                }
 
                 if consecutive == 2:
                     level = "1进2"
@@ -238,12 +335,19 @@ class BoardDataFetcher:
                     level = "2进3"
                 elif consecutive == 4:
                     level = "3进4"
-                else:
+                elif consecutive >= 5:
                     level = "4板+"
+                else:
+                    # consecutive == 1, still show but at lowest priority
+                    continue
 
                 if level not in chain_groups:
                     chain_groups[level] = []
                 chain_groups[level].append(stock)
+
+            logger.info(
+                f"连板天梯分组: {[(k, len(v)) for k, v in chain_groups.items()]}"
+            )
             return chain_groups
         except Exception as e:
             logger.warning(f"获取连板天梯数据失败: {e}")
@@ -442,18 +546,43 @@ class BoardScreener(BaseScreener):
             if code and code not in seen_codes:
                 seen_codes.add(code)
                 net = entry.get("net_amount", 0)
+                lhb_freq = entry.get("lhb_frequency", 0)
+                change_1m = entry.get("change_1m", 0)
+                inst_buy = entry.get("inst_buy_count", 0)
+                inst_sell = entry.get("inst_sell_count", 0)
+                risk_tags = entry.get("risk_tags", [])
+
+                reason_parts = [
+                    f"{entry.get('reason', '龙虎榜上榜')}",
+                ]
+                if inst_buy > 0:
+                    reason_parts.append(f"机构买入 {inst_buy} 次")
+                if change_1m != 0:
+                    direction = "涨" if change_1m > 0 else "跌"
+                    reason_parts.append(f"近1月{direction} {abs(change_1m):.1f}%")
+                if risk_tags:
+                    reason_parts.append(f"风险: {', '.join(risk_tags)}")
+
+                reason = " | ".join(reason_parts)
+
                 candidates.append(ScreenerCandidate(
                     code=code,
                     name=entry["name"],
-                    reason=(
-                        f"龙虎榜 | {entry.get('reason', '游资上榜')}"
-                        f" | 净买入 {net/1e8:.2f} 亿"
-                    ),
+                    reason=reason,
                     score=0.0,
                     metadata={
                         "chain_level": "龙虎榜",
-                        "sector": "",
+                        "sector": entry.get("sector", ""),
                         "net_amount": net,
+                        "lhb_frequency": lhb_freq,
+                        "lhb_total_amount": entry.get("lhb_total_amount", 0),
+                        "inst_buy_count": inst_buy,
+                        "inst_sell_count": inst_sell,
+                        "change_1m": change_1m,
+                        "change_3m": entry.get("change_3m", 0),
+                        "risk_tags": risk_tags,
+                        "close": entry.get("close", 0),
+                        "change_pct": entry.get("change_pct", 0),
                     }
                 ))
 
@@ -505,6 +634,14 @@ class BoardScreener(BaseScreener):
             # 3) 龙虎榜上榜 (15 分)
             if c.code in lhb_codes:
                 score += 15
+                # 额外加分：机构净买入、上榜频率、近期涨幅
+                inst_buy = meta.get("inst_buy_count", 0)
+                inst_sell = meta.get("inst_sell_count", 0)
+                if inst_buy > inst_sell:
+                    score += 5  # 机构净买入加分
+                lhb_freq = meta.get("lhb_frequency", 0)
+                if lhb_freq >= 5:
+                    score += 3  # 频繁上榜加分
 
             # 4) 量比 (最高 10 分)
             vr = meta.get("volume_ratio", 0)
@@ -521,6 +658,17 @@ class BoardScreener(BaseScreener):
                 score += 10
             elif 5 <= tr < 10 or 20 < tr <= 30:
                 score += 5
+
+            # 6) 风险扣分
+            risk_tags = meta.get("risk_tags", [])
+            score -= len(risk_tags) * 3  # 每个风险标签扣 3 分
+            change_1m = meta.get("change_1m", 0)
+            if change_1m > 80:
+                score -= 10  # 短期涨幅过大
+            elif change_1m < -30:
+                score -= 5  # 短期跌幅过大
+
+            c.score = max(score, 0)  # 确保分数不为负
 
             c.score = score
 
@@ -632,6 +780,7 @@ class BoardScreener(BaseScreener):
 - 1进2重点关注：[股票名 + 原因]
 - 2进3重点关注：[股票名 + 原因]
 - 3进4重点关注：[股票名 + 原因]
+- 其他连板重点关注：[股票名 + 原因]
 
 💡 **个股买入策略**
 对每只候选股票：

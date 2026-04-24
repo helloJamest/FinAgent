@@ -154,32 +154,64 @@ const ScreenerPage: React.FC = () => {
                 {level} ({group.length} 只)
               </h3>
               <div className="space-y-2">
-                {group.map((candidate, index) => (
-                  <Card key={candidate.code} className="p-4 transition-all hover:border-cyan/30">
-                    <div className="flex items-start justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white/10 text-xs font-bold text-foreground">
-                          {index + 1}
-                        </div>
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <span className="font-mono text-sm font-semibold text-foreground">
-                              {candidate.code}
-                            </span>
-                            <span className="text-sm text-foreground">{candidate.name}</span>
+                {group.map((candidate, index) => {
+                  const meta = candidate.metadata || {};
+                  const riskTags = meta.riskTags as string[] | undefined;
+                  const close = meta.close as number | undefined;
+                  const changePct = meta.changePct as number | undefined;
+
+                  return (
+                    <Card key={candidate.code} className="p-4 transition-all hover:border-cyan/30">
+                      <div className="space-y-3">
+                        <div className="flex items-start justify-between">
+                          <div className="flex items-center gap-3">
+                            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white/10 text-xs font-bold text-foreground">
+                              {index + 1}
+                            </div>
+                            <div>
+                              <div className="flex items-center gap-2">
+                                <span className="font-mono text-sm font-semibold text-foreground">
+                                  {candidate.code}
+                                </span>
+                                <span className="text-sm text-foreground">{candidate.name}</span>
+                                {close != null && close > 0 && (
+                                  <span className="text-xs text-muted-foreground">
+                                    收盘 ¥{close}
+                                    {changePct != null && (
+                                      <span className={changePct > 0 ? 'text-red-400' : 'text-green-400'}>
+                                        {' '}{changePct > 0 ? '+' : ''}{changePct}%
+                                      </span>
+                                    )}
+                                  </span>
+                                )}
+                              </div>
+                              <p className="mt-1 text-xs text-muted-foreground">{candidate.reason}</p>
+                            </div>
                           </div>
-                          <p className="mt-1 text-xs text-muted-foreground">{candidate.reason}</p>
+                          {candidate.score != null && (
+                            <div className="text-right">
+                              <div className="text-lg font-bold text-foreground">{candidate.score}</div>
+                              <div className="text-xs text-muted-foreground">评分</div>
+                            </div>
+                          )}
                         </div>
+
+                        {riskTags && riskTags.length > 0 && (
+                          <div className="flex flex-wrap gap-1">
+                            {riskTags.map((tag, i) => (
+                              <span
+                                key={i}
+                                className="rounded-md bg-red-500/10 px-1.5 py-0.5 text-[11px] font-medium text-red-400"
+                              >
+                                ⚠ {tag}
+                              </span>
+                            ))}
+                          </div>
+                        )}
                       </div>
-                      {candidate.score != null && (
-                        <div className="text-right">
-                          <div className="text-lg font-bold text-foreground">{candidate.score}</div>
-                          <div className="text-xs text-muted-foreground">评分</div>
-                        </div>
-                      )}
-                    </div>
-                  </Card>
-                ))}
+                    </Card>
+                  );
+                })}
               </div>
             </div>
           );
@@ -195,32 +227,102 @@ const ScreenerPage: React.FC = () => {
                 {level} ({group.length} 只)
               </h3>
               <div className="space-y-2">
-                {group.map((candidate) => (
-                  <Card key={candidate.code} className="p-4 transition-all hover:border-cyan/30">
-                    <div className="flex items-start justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white/10 text-xs font-bold text-foreground">
-                          {candidate.code.slice(-2)}
-                        </div>
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <span className="font-mono text-sm font-semibold text-foreground">
-                              {candidate.code}
-                            </span>
-                            <span className="text-sm text-foreground">{candidate.name}</span>
+                {group.map((candidate) => {
+                  const meta = candidate.metadata || {};
+                  const lhbFreq = meta.lhbFrequency as number | undefined;
+                  const instBuy = meta.instBuyCount as number | undefined;
+                  const instSell = meta.instSellCount as number | undefined;
+                  const change1m = meta.change1m as number | undefined;
+                  const netAmount = meta.netAmount as number | undefined;
+                  const lhbTotal = meta.lhbTotalAmount as number | undefined;
+                  const riskTags = meta.riskTags as string[] | undefined;
+                  const close = meta.close as number | undefined;
+                  const changePct = meta.changePct as number | undefined;
+
+                  return (
+                    <Card key={candidate.code} className="p-4 transition-all hover:border-cyan/30">
+                      <div className="space-y-3">
+                        {/* Header: stock info + score */}
+                        <div className="flex items-start justify-between">
+                          <div className="flex items-center gap-3">
+                            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white/10 text-xs font-bold text-foreground">
+                              {candidate.code.slice(-2)}
+                            </div>
+                            <div>
+                              <div className="flex items-center gap-2">
+                                <span className="font-mono text-sm font-semibold text-foreground">
+                                  {candidate.code}
+                                </span>
+                                <span className="text-sm text-foreground">{candidate.name}</span>
+                                {close != null && close > 0 && (
+                                  <span className="text-xs text-muted-foreground">
+                                    收盘 ¥{close}
+                                    {changePct != null && (
+                                      <span className={changePct > 0 ? 'text-red-400' : 'text-green-400'}>
+                                        {' '}{changePct > 0 ? '+' : ''}{changePct}%
+                                      </span>
+                                    )}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
                           </div>
-                          <p className="mt-1 text-xs text-muted-foreground">{candidate.reason}</p>
+                          {candidate.score != null && (
+                            <div className="text-right">
+                              <div className="text-lg font-bold text-foreground">{candidate.score}</div>
+                              <div className="text-xs text-muted-foreground">评分</div>
+                            </div>
+                          )}
                         </div>
+
+                        {/* Reason */}
+                        {candidate.reason && (
+                          <p className="text-xs text-muted-foreground">{candidate.reason}</p>
+                        )}
+
+                        {/* Detail Grid: stats */}
+                        <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
+                          {lhbFreq != null && lhbFreq > 0 && (
+                            <span>上榜 <b className="text-foreground">{lhbFreq}</b> 次</span>
+                          )}
+                          {instBuy != null && instBuy > 0 && (
+                            <span>机构买入 <b className="text-emerald-400">{instBuy}</b> 次</span>
+                          )}
+                          {instSell != null && instSell > 0 && (
+                            <span>机构卖出 <b className="text-red-400">{instSell}</b> 次</span>
+                          )}
+                          {netAmount != null && netAmount !== 0 && (
+                            <span className={netAmount > 0 ? 'text-emerald-400' : 'text-red-400'}>
+                              龙虎榜净{netAmount > 0 ? '买' : '卖'} <b>{Math.abs(netAmount) / 1e8 > 0 ? `${(Math.abs(netAmount) / 1e8).toFixed(2)}亿` : `${(Math.abs(netAmount) / 1e4).toFixed(1)}万`}</b>
+                            </span>
+                          )}
+                          {lhbTotal != null && lhbTotal > 0 && (
+                            <span>总成交 <b>{(lhbTotal / 1e8).toFixed(2)}亿</b></span>
+                          )}
+                          {change1m != null && change1m !== 0 && (
+                            <span className={change1m > 0 ? 'text-red-400' : 'text-green-400'}>
+                              近1月{change1m > 0 ? '+' : ''}{change1m}%
+                            </span>
+                          )}
+                        </div>
+
+                        {/* Risk Tags */}
+                        {riskTags && riskTags.length > 0 && (
+                          <div className="flex flex-wrap gap-1">
+                            {riskTags.map((tag, i) => (
+                              <span
+                                key={i}
+                                className="rounded-md bg-red-500/10 px-1.5 py-0.5 text-[11px] font-medium text-red-400"
+                              >
+                                ⚠ {tag}
+                              </span>
+                            ))}
+                          </div>
+                        )}
                       </div>
-                      {candidate.score != null && (
-                        <div className="text-right">
-                          <div className="text-lg font-bold text-foreground">{candidate.score}</div>
-                          <div className="text-xs text-muted-foreground">评分</div>
-                        </div>
-                      )}
-                    </div>
-                  </Card>
-                ))}
+                    </Card>
+                  );
+                })}
               </div>
             </div>
           ))}
