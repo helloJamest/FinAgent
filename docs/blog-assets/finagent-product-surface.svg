@@ -1,0 +1,61 @@
+<svg width="1600" height="900" viewBox="0 0 1600 900" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1600" height="900" fill="#0A1018"/>
+  <rect x="28" y="28" width="1544" height="844" rx="28" fill="#0F172A" stroke="#23344F" stroke-width="2"/>
+  <text x="84" y="104" fill="#E7EEF8" font-family="Segoe UI, Arial, sans-serif" font-size="40" font-weight="700">
+    Productized Delivery Surfaces
+  </text>
+  <text x="84" y="144" fill="#93A6C0" font-family="Segoe UI, Arial, sans-serif" font-size="20">
+    One analysis core, multiple consumption channels: API, Web, Desktop, Bot, and notification systems
+  </text>
+
+  <rect x="575" y="300" width="450" height="220" rx="26" fill="#14213D" stroke="#2E4D78"/>
+  <text x="637" y="372" fill="#9CD8FF" font-family="Segoe UI, Arial, sans-serif" font-size="34" font-weight="700">
+    FinAgent Core
+  </text>
+  <text x="650" y="415" fill="#E4EEF8" font-family="Segoe UI, Arial, sans-serif" font-size="24">
+    pipeline + services + agents + dashboard
+  </text>
+  <text x="665" y="453" fill="#B7CAE0" font-family="Segoe UI, Arial, sans-serif" font-size="21">
+    one capability center for all entry points
+  </text>
+
+  <rect x="120" y="140" width="240" height="110" rx="18" fill="#173056" stroke="#305C91"/>
+  <text x="215" y="188" fill="#EAF3FD" font-family="Segoe UI, Arial, sans-serif" font-size="28" font-weight="700">API</text>
+  <text x="154" y="220" fill="#D4E3F7" font-family="Segoe UI, Arial, sans-serif" font-size="20">FastAPI service layer</text>
+
+  <rect x="120" y="620" width="240" height="110" rx="18" fill="#163A31" stroke="#2F6F5A"/>
+  <text x="208" y="668" fill="#ECFFF8" font-family="Segoe UI, Arial, sans-serif" font-size="28" font-weight="700">Web</text>
+  <text x="157" y="700" fill="#D9F2E8" font-family="Segoe UI, Arial, sans-serif" font-size="20">task UI + dashboard</text>
+
+  <rect x="1240" y="140" width="240" height="110" rx="18" fill="#4A2D18" stroke="#8D5829"/>
+  <text x="1314" y="188" fill="#FFF1E1" font-family="Segoe UI, Arial, sans-serif" font-size="28" font-weight="700">Desktop</text>
+  <text x="1280" y="220" fill="#F2E3D3" font-family="Segoe UI, Arial, sans-serif" font-size="20">Electron packaging</text>
+
+  <rect x="1240" y="620" width="240" height="110" rx="18" fill="#3E2031" stroke="#8D4568"/>
+  <text x="1334" y="668" fill="#FFF0F7" font-family="Segoe UI, Arial, sans-serif" font-size="28" font-weight="700">Bot</text>
+  <text x="1280" y="700" fill="#F1DDE7" font-family="Segoe UI, Arial, sans-serif" font-size="20">Feishu / DingTalk / Discord</text>
+
+  <rect x="90" y="345" width="290" height="120" rx="18" fill="#2E1F47" stroke="#63419A"/>
+  <text x="150" y="396" fill="#E9DFFF" font-family="Segoe UI, Arial, sans-serif" font-size="30" font-weight="700">Async Task Queue</text>
+  <text x="152" y="432" fill="#E6DCF8" font-family="Segoe UI, Arial, sans-serif" font-size="20">status, dedupe, SSE stream</text>
+
+  <rect x="1220" y="345" width="290" height="120" rx="18" fill="#3A2222" stroke="#8F4D4D"/>
+  <text x="1287" y="396" fill="#FFD3D3" font-family="Segoe UI, Arial, sans-serif" font-size="30" font-weight="700">Notifications</text>
+  <text x="1270" y="432" fill="#F3E0E0" font-family="Segoe UI, Arial, sans-serif" font-size="20">email, Telegram, WeChat, Feishu</text>
+
+  <path d="M360 195C470 195 520 280 575 350" stroke="#6E86A4" stroke-width="5"/>
+  <polygon points="572,344 563,326 582,332" fill="#6E86A4"/>
+  <path d="M360 675C470 675 520 585 575 470" stroke="#6E86A4" stroke-width="5"/>
+  <polygon points="573,474 579,455 561,463" fill="#6E86A4"/>
+  <path d="M1240 195C1130 195 1080 280 1025 350" stroke="#6E86A4" stroke-width="5"/>
+  <polygon points="1028,344 1018,332 1037,326" fill="#6E86A4"/>
+  <path d="M1240 675C1130 675 1080 585 1025 470" stroke="#6E86A4" stroke-width="5"/>
+  <polygon points="1029,474 1040,463 1021,455" fill="#6E86A4"/>
+  <path d="M380 405H575" stroke="#7E95B2" stroke-width="5" stroke-linecap="round"/><polygon points="567,405 553,397 553,413" fill="#7E95B2"/>
+  <path d="M1025 405H1220" stroke="#7E95B2" stroke-width="5" stroke-linecap="round"/><polygon points="1212,405 1198,397 1198,413" fill="#7E95B2"/>
+
+  <rect x="150" y="790" width="1300" height="42" rx="12" fill="#101827"/>
+  <text x="188" y="818" fill="#B8C9DE" font-family="Segoe UI, Arial, sans-serif" font-size="18">
+    Productization is not an afterthought here: interaction, long-running execution, rendering, push delivery, and history are all first-class parts of the system.
+  </text>
+</svg>

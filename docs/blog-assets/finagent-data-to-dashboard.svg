@@ -1,0 +1,74 @@
+<svg width="1600" height="900" viewBox="0 0 1600 900" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1600" height="900" fill="#0A101A"/>
+  <rect x="32" y="32" width="1536" height="836" rx="28" fill="#0F172A" stroke="#20304A" stroke-width="2"/>
+
+  <text x="88" y="106" fill="#E6EEF8" font-family="Segoe UI, Arial, sans-serif" font-size="40" font-weight="700">
+    From Multi-Source Data to Decision Dashboard
+  </text>
+  <text x="88" y="145" fill="#91A4BF" font-family="Segoe UI, Arial, sans-serif" font-size="20">
+    Why FinAgent is not a free-floating agent, but an agent built on top of a prepared analysis substrate
+  </text>
+
+  <rect x="88" y="214" width="300" height="500" rx="22" fill="#12233F" stroke="#26456F"/>
+  <text x="118" y="260" fill="#9AD9FF" font-family="Segoe UI, Arial, sans-serif" font-size="28" font-weight="700">Data Providers</text>
+  <rect x="118" y="294" width="240" height="54" rx="12" fill="#183056"/><text x="145" y="328" fill="#E5EEF8" font-family="Segoe UI, Arial, sans-serif" font-size="22">AkShare</text>
+  <rect x="118" y="366" width="240" height="54" rx="12" fill="#183056"/><text x="145" y="400" fill="#E5EEF8" font-family="Segoe UI, Arial, sans-serif" font-size="22">Tushare</text>
+  <rect x="118" y="438" width="240" height="54" rx="12" fill="#183056"/><text x="145" y="472" fill="#E5EEF8" font-family="Segoe UI, Arial, sans-serif" font-size="22">Pytdx / Baostock</text>
+  <rect x="118" y="510" width="240" height="54" rx="12" fill="#183056"/><text x="145" y="544" fill="#E5EEF8" font-family="Segoe UI, Arial, sans-serif" font-size="22">yfinance</text>
+  <rect x="118" y="582" width="240" height="54" rx="12" fill="#183056"/><text x="145" y="616" fill="#E5EEF8" font-family="Segoe UI, Arial, sans-serif" font-size="22">Longbridge</text>
+  <text x="118" y="681" fill="#B6C7DD" font-family="Segoe UI, Arial, sans-serif" font-size="18">
+    unified fetch interface
+  </text>
+
+  <rect x="472" y="214" width="360" height="500" rx="22" fill="#132A22" stroke="#2B6B54"/>
+  <text x="502" y="260" fill="#97F0C0" font-family="Segoe UI, Arial, sans-serif" font-size="28" font-weight="700">Feature and Context Prep</text>
+  <rect x="502" y="294" width="300" height="70" rx="14" fill="#1B3E33"/>
+  <text x="530" y="337" fill="#E7FFF2" font-family="Segoe UI, Arial, sans-serif" font-size="22">Price history and realtime quote</text>
+  <rect x="502" y="386" width="300" height="70" rx="14" fill="#1B3E33"/>
+  <text x="530" y="429" fill="#E7FFF2" font-family="Segoe UI, Arial, sans-serif" font-size="22">Trend, MA, volume, chip structure</text>
+  <rect x="502" y="478" width="300" height="70" rx="14" fill="#1B3E33"/>
+  <text x="530" y="521" fill="#E7FFF2" font-family="Segoe UI, Arial, sans-serif" font-size="22">Fundamental and market context</text>
+  <rect x="502" y="570" width="300" height="70" rx="14" fill="#1B3E33"/>
+  <text x="530" y="613" fill="#E7FFF2" font-family="Segoe UI, Arial, sans-serif" font-size="22">Search, news, risk and sentiment</text>
+  <text x="502" y="681" fill="#C0E7D3" font-family="Segoe UI, Arial, sans-serif" font-size="18">
+    normalized before model reasoning
+  </text>
+
+  <rect x="916" y="214" width="260" height="500" rx="22" fill="#3A2516" stroke="#7C4A24"/>
+  <text x="946" y="260" fill="#F9C58E" font-family="Segoe UI, Arial, sans-serif" font-size="28" font-weight="700">Agent Reasoning</text>
+  <rect x="946" y="304" width="200" height="74" rx="14" fill="#4A311C"/>
+  <text x="990" y="348" fill="#FFF0DF" font-family="Segoe UI, Arial, sans-serif" font-size="22">single</text>
+  <rect x="946" y="404" width="200" height="74" rx="14" fill="#4A311C"/>
+  <text x="995" y="448" fill="#FFF0DF" font-family="Segoe UI, Arial, sans-serif" font-size="22">multi</text>
+  <rect x="946" y="504" width="200" height="74" rx="14" fill="#4A311C"/>
+  <text x="987" y="548" fill="#FFF0DF" font-family="Segoe UI, Arial, sans-serif" font-size="22">debate</text>
+  <text x="946" y="681" fill="#EFD6BE" font-family="Segoe UI, Arial, sans-serif" font-size="18">
+    tool-augmented synthesis
+  </text>
+
+  <rect x="1260" y="214" width="250" height="500" rx="22" fill="#3C1D2B" stroke="#8D4264"/>
+  <text x="1290" y="260" fill="#FFBCD7" font-family="Segoe UI, Arial, sans-serif" font-size="28" font-weight="700">Dashboard Output</text>
+  <rect x="1290" y="304" width="190" height="66" rx="14" fill="#532739"/>
+  <text x="1313" y="345" fill="#FFF0F6" font-family="Segoe UI, Arial, sans-serif" font-size="22">decision_type</text>
+  <rect x="1290" y="390" width="190" height="66" rx="14" fill="#532739"/>
+  <text x="1310" y="431" fill="#FFF0F6" font-family="Segoe UI, Arial, sans-serif" font-size="22">confidence_level</text>
+  <rect x="1290" y="476" width="190" height="66" rx="14" fill="#532739"/>
+  <text x="1330" y="517" fill="#FFF0F6" font-family="Segoe UI, Arial, sans-serif" font-size="22">key_points</text>
+  <rect x="1290" y="562" width="190" height="66" rx="14" fill="#532739"/>
+  <text x="1323" y="603" fill="#FFF0F6" font-family="Segoe UI, Arial, sans-serif" font-size="22">risk_warning</text>
+  <text x="1290" y="681" fill="#F0D5E0" font-family="Segoe UI, Arial, sans-serif" font-size="18">
+    readable and machine-consumable
+  </text>
+
+  <path d="M388 464H472" stroke="#6A7D99" stroke-width="6" stroke-linecap="round"/>
+  <path d="M832 464H916" stroke="#6A7D99" stroke-width="6" stroke-linecap="round"/>
+  <path d="M1176 464H1260" stroke="#6A7D99" stroke-width="6" stroke-linecap="round"/>
+  <polygon points="462,464 446,455 446,473" fill="#6A7D99"/>
+  <polygon points="906,464 890,455 890,473" fill="#6A7D99"/>
+  <polygon points="1250,464 1234,455 1234,473" fill="#6A7D99"/>
+
+  <rect x="88" y="762" width="1422" height="70" rx="16" fill="#111C2F" stroke="#223552"/>
+  <text x="116" y="806" fill="#D8E5F5" font-family="Segoe UI, Arial, sans-serif" font-size="24">
+    Design principle: prepare structured evidence first, let the agent reason second, and deliver stable output third.
+  </text>
+</svg>

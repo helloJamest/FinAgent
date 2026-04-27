@@ -1,0 +1,98 @@
+<svg width="1600" height="900" viewBox="0 0 1600 900" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1600" height="900" fill="#0B1220"/>
+  <rect x="24" y="24" width="1552" height="852" rx="28" fill="#0F172A" stroke="#1F2A44" stroke-width="2"/>
+
+  <text x="80" y="108" fill="#E5EEF8" font-family="Segoe UI, Arial, sans-serif" font-size="42" font-weight="700">
+    FinAgent System Overview
+  </text>
+  <text x="80" y="148" fill="#8FA3BF" font-family="Segoe UI, Arial, sans-serif" font-size="20">
+    A productized stock analysis system across data, orchestration, agents, outputs, and feedback loops
+  </text>
+
+  <rect x="80" y="210" width="230" height="110" rx="18" fill="#14213D" stroke="#29426B"/>
+  <text x="110" y="255" fill="#7DD3FC" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="700">Entry Layer</text>
+  <text x="110" y="287" fill="#D7E4F4" font-family="Segoe UI, Arial, sans-serif" font-size="20">CLI / API / Web</text>
+  <text x="110" y="314" fill="#D7E4F4" font-family="Segoe UI, Arial, sans-serif" font-size="20">Desktop / Bot</text>
+
+  <rect x="380" y="210" width="260" height="110" rx="18" fill="#132A13" stroke="#275C35"/>
+  <text x="412" y="255" fill="#86EFAC" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="700">Orchestration Layer</text>
+  <text x="412" y="287" fill="#E2F7E7" font-family="Segoe UI, Arial, sans-serif" font-size="20">main.py / pipeline.py</text>
+  <text x="412" y="314" fill="#E2F7E7" font-family="Segoe UI, Arial, sans-serif" font-size="20">task queue / schedule</text>
+
+  <rect x="710" y="210" width="320" height="110" rx="18" fill="#3A2618" stroke="#7C4A25"/>
+  <text x="742" y="255" fill="#FDBA74" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="700">Data and Service Layer</text>
+  <text x="742" y="287" fill="#F8E6D5" font-family="Segoe UI, Arial, sans-serif" font-size="20">Market data / search / storage</text>
+  <text x="742" y="314" fill="#F8E6D5" font-family="Segoe UI, Arial, sans-serif" font-size="20">notification / history / auth</text>
+
+  <rect x="1100" y="210" width="250" height="110" rx="18" fill="#2E1F47" stroke="#5B3B96"/>
+  <text x="1130" y="255" fill="#C4B5FD" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="700">Agent Layer</text>
+  <text x="1130" y="287" fill="#EEE9FF" font-family="Segoe UI, Arial, sans-serif" font-size="20">single / multi / debate</text>
+  <text x="1130" y="314" fill="#EEE9FF" font-family="Segoe UI, Arial, sans-serif" font-size="20">tools / roles / skills</text>
+
+  <rect x="1380" y="210" width="140" height="110" rx="18" fill="#3F1B2D" stroke="#8A2E5B"/>
+  <text x="1404" y="255" fill="#F9A8D4" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="700">Output</text>
+  <text x="1404" y="287" fill="#FFE5F1" font-family="Segoe UI, Arial, sans-serif" font-size="20">Dashboard</text>
+  <text x="1404" y="314" fill="#FFE5F1" font-family="Segoe UI, Arial, sans-serif" font-size="20">Reports</text>
+
+  <path d="M310 265H380" stroke="#5B708F" stroke-width="6" stroke-linecap="round"/>
+  <path d="M640 265H710" stroke="#5B708F" stroke-width="6" stroke-linecap="round"/>
+  <path d="M1030 265H1100" stroke="#5B708F" stroke-width="6" stroke-linecap="round"/>
+  <path d="M1350 265H1380" stroke="#5B708F" stroke-width="6" stroke-linecap="round"/>
+
+  <polygon points="372,265 356,256 356,274" fill="#5B708F"/>
+  <polygon points="702,265 686,256 686,274" fill="#5B708F"/>
+  <polygon points="1092,265 1076,256 1076,274" fill="#5B708F"/>
+  <polygon points="1372,265 1356,256 1356,274" fill="#5B708F"/>
+
+  <rect x="80" y="392" width="690" height="220" rx="24" fill="#101B31" stroke="#20304F"/>
+  <text x="112" y="440" fill="#E5EEF8" font-family="Segoe UI, Arial, sans-serif" font-size="28" font-weight="700">
+    Runtime Core Flow
+  </text>
+  <rect x="112" y="478" width="150" height="90" rx="14" fill="#173056" stroke="#29538D"/>
+  <text x="143" y="515" fill="#CFE6FF" font-family="Segoe UI, Arial, sans-serif" font-size="19" font-weight="700">Data Fetch</text>
+  <text x="137" y="543" fill="#DDEAF8" font-family="Segoe UI, Arial, sans-serif" font-size="18">multi-source</text>
+
+  <rect x="302" y="478" width="150" height="90" rx="14" fill="#153C35" stroke="#2F7B6E"/>
+  <text x="331" y="515" fill="#D5FFF2" font-family="Segoe UI, Arial, sans-serif" font-size="19" font-weight="700">Feature Prep</text>
+  <text x="324" y="543" fill="#D8F4EA" font-family="Segoe UI, Arial, sans-serif" font-size="18">trend / chip</text>
+
+  <rect x="492" y="478" width="150" height="90" rx="14" fill="#4A2A16" stroke="#A0602A"/>
+  <text x="517" y="515" fill="#FFE5CA" font-family="Segoe UI, Arial, sans-serif" font-size="19" font-weight="700">Intel Search</text>
+  <text x="524" y="543" fill="#F5E4D5" font-family="Segoe UI, Arial, sans-serif" font-size="18">news / risk</text>
+
+  <path d="M262 523H302" stroke="#607594" stroke-width="5" stroke-linecap="round"/>
+  <path d="M452 523H492" stroke="#607594" stroke-width="5" stroke-linecap="round"/>
+  <polygon points="294,523 280,515 280,531" fill="#607594"/>
+  <polygon points="484,523 470,515 470,531" fill="#607594"/>
+
+  <rect x="840" y="392" width="680" height="220" rx="24" fill="#1D132A" stroke="#3F2C61"/>
+  <text x="872" y="440" fill="#F2EAFE" font-family="Segoe UI, Arial, sans-serif" font-size="28" font-weight="700">
+    Intelligent Decision Layer
+  </text>
+  <rect x="872" y="478" width="160" height="90" rx="14" fill="#2E2344" stroke="#654D91"/>
+  <text x="902" y="515" fill="#E9DFFF" font-family="Segoe UI, Arial, sans-serif" font-size="19" font-weight="700">Agent Modes</text>
+  <text x="892" y="543" fill="#E6DCF6" font-family="Segoe UI, Arial, sans-serif" font-size="18">single / multi</text>
+
+  <rect x="1082" y="478" width="160" height="90" rx="14" fill="#37223A" stroke="#8D4D94"/>
+  <text x="1117" y="515" fill="#FFD8FF" font-family="Segoe UI, Arial, sans-serif" font-size="19" font-weight="700">Debate</text>
+  <text x="1100" y="543" fill="#F1DDF1" font-family="Segoe UI, Arial, sans-serif" font-size="18">bull / bear / mod</text>
+
+  <rect x="1292" y="478" width="180" height="90" rx="14" fill="#3B1F28" stroke="#A34F67"/>
+  <text x="1319" y="515" fill="#FFD7E1" font-family="Segoe UI, Arial, sans-serif" font-size="19" font-weight="700">Decision Output</text>
+  <text x="1325" y="543" fill="#F7E2E8" font-family="Segoe UI, Arial, sans-serif" font-size="18">dashboard JSON</text>
+
+  <path d="M1032 523H1082" stroke="#7A6A9A" stroke-width="5" stroke-linecap="round"/>
+  <path d="M1242 523H1292" stroke="#7A6A9A" stroke-width="5" stroke-linecap="round"/>
+  <polygon points="1074,523 1060,515 1060,531" fill="#7A6A9A"/>
+  <polygon points="1284,523 1270,515 1270,531" fill="#7A6A9A"/>
+
+  <rect x="80" y="668" width="1440" height="140" rx="24" fill="#101722" stroke="#233147"/>
+  <text x="112" y="714" fill="#E5EEF8" font-family="Segoe UI, Arial, sans-serif" font-size="28" font-weight="700">
+    Feedback and Growth Loop
+  </text>
+  <text x="112" y="755" fill="#9DB0C8" font-family="Segoe UI, Arial, sans-serif" font-size="20">
+    History, backtest, memory, reflection, learned skills, and debate tracking feed future analysis
+  </text>
+  <path d="M1210 740C1320 740 1410 700 1470 620C1525 545 1520 420 1450 350" stroke="#3BA1C5" stroke-width="4" stroke-dasharray="10 10"/>
+  <polygon points="1444,360 1454,343 1434,343" fill="#3BA1C5"/>
+</svg>

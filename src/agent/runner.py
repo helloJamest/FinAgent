@@ -769,9 +769,15 @@ def _stream_final_answer(
     """Stream the final LLM response, emitting content chunks via progress_callback.
 
     Returns the accumulated full text.
+
+    NOTE: We pass the full messages (including tool results) but **without**
+    tool declarations to the streaming call.  This prevents the model from
+    deciding mid-stream to call more tools after the non-streaming call had
+    already committed to a final answer.
     """
     full_text: List[str] = []
-    stream_gen = llm_adapter.stream_call_with_tools(messages, tool_decls, timeout=timeout)
+    # Strip tools from the streaming call — the model already chose "final answer"
+    stream_gen = llm_adapter.stream_call_with_tools(messages, [], timeout=timeout)
 
     for delta_text, chunk_usage, error_msg in stream_gen:
         if error_msg:

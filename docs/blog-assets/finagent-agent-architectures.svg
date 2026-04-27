@@ -1,0 +1,49 @@
+<svg width="1600" height="920" viewBox="0 0 1600 920" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1600" height="920" fill="#0B1120"/>
+  <rect x="28" y="28" width="1544" height="864" rx="28" fill="#0F172A" stroke="#22314D" stroke-width="2"/>
+  <text x="84" y="102" fill="#E8EEF8" font-family="Segoe UI, Arial, sans-serif" font-size="40" font-weight="700">
+    Agent Architecture Modes in FinAgent
+  </text>
+  <text x="84" y="141" fill="#93A7C0" font-family="Segoe UI, Arial, sans-serif" font-size="20">
+    Three reasoning paths: lower-cost single-agent, role-split multi-agent, and explicit bull-bear debate
+  </text>
+
+  <rect x="80" y="210" width="430" height="600" rx="24" fill="#11223E" stroke="#28456D"/>
+  <text x="112" y="258" fill="#9ED7FF" font-family="Segoe UI, Arial, sans-serif" font-size="30" font-weight="700">Single Agent</text>
+  <text x="112" y="290" fill="#DCE9F6" font-family="Segoe UI, Arial, sans-serif" font-size="19">ReAct loop with tool calling</text>
+  <rect x="140" y="340" width="310" height="76" rx="14" fill="#193056"/><text x="214" y="386" fill="#EEF5FD" font-family="Segoe UI, Arial, sans-serif" font-size="24">User Query</text>
+  <path d="M295 416V458" stroke="#6A88B0" stroke-width="5"/><polygon points="295,476 284,456 306,456" fill="#6A88B0"/>
+  <rect x="140" y="476" width="310" height="96" rx="14" fill="#1F3B67"/><text x="220" y="521" fill="#EEF5FD" font-family="Segoe UI, Arial, sans-serif" font-size="24">AgentExecutor</text><text x="188" y="552" fill="#D4E4F8" font-family="Segoe UI, Arial, sans-serif" font-size="20">plan -> call tools -> answer</text>
+  <path d="M295 572V614" stroke="#6A88B0" stroke-width="5"/><polygon points="295,632 284,612 306,612" fill="#6A88B0"/>
+  <rect x="140" y="632" width="310" height="96" rx="14" fill="#193056"/><text x="208" y="677" fill="#EEF5FD" font-family="Segoe UI, Arial, sans-serif" font-size="24">Decision Output</text><text x="175" y="708" fill="#D4E4F8" font-family="Segoe UI, Arial, sans-serif" font-size="20">text or dashboard JSON</text>
+
+  <rect x="585" y="210" width="430" height="600" rx="24" fill="#13281F" stroke="#2E6D53"/>
+  <text x="617" y="258" fill="#9EF3C3" font-family="Segoe UI, Arial, sans-serif" font-size="30" font-weight="700">Multi Agent</text>
+  <text x="617" y="290" fill="#DDF7E8" font-family="Segoe UI, Arial, sans-serif" font-size="19">Pipeline with specialized roles</text>
+  <rect x="645" y="336" width="120" height="64" rx="12" fill="#1E3C31"/><text x="671" y="376" fill="#F0FFF7" font-family="Segoe UI, Arial, sans-serif" font-size="22">Technical</text>
+  <rect x="835" y="336" width="120" height="64" rx="12" fill="#1E3C31"/><text x="876" y="376" fill="#F0FFF7" font-family="Segoe UI, Arial, sans-serif" font-size="22">Intel</text>
+  <rect x="740" y="438" width="120" height="64" rx="12" fill="#23483A"/><text x="779" y="478" fill="#F0FFF7" font-family="Segoe UI, Arial, sans-serif" font-size="22">Risk</text>
+  <rect x="645" y="540" width="120" height="64" rx="12" fill="#285343"/><text x="691" y="580" fill="#F0FFF7" font-family="Segoe UI, Arial, sans-serif" font-size="22">Skills</text>
+  <rect x="835" y="540" width="120" height="64" rx="12" fill="#285343"/><text x="872" y="580" fill="#F0FFF7" font-family="Segoe UI, Arial, sans-serif" font-size="22">Decision</text>
+  <path d="M765 368H835" stroke="#6CB592" stroke-width="5"/><polygon points="827,368 813,360 813,376" fill="#6CB592"/>
+  <path d="M895 400V438" stroke="#6CB592" stroke-width="5"/><polygon points="895,456 884,436 906,436" fill="#6CB592"/>
+  <path d="M800 502V540" stroke="#6CB592" stroke-width="5"/><polygon points="800,558 789,538 811,538" fill="#6CB592"/>
+  <path d="M765 572H835" stroke="#6CB592" stroke-width="5"/><polygon points="827,572 813,564 813,580" fill="#6CB592"/>
+
+  <rect x="1090" y="210" width="430" height="600" rx="24" fill="#2A1727" stroke="#6E3B69"/>
+  <text x="1122" y="258" fill="#FFB6E5" font-family="Segoe UI, Arial, sans-serif" font-size="30" font-weight="700">Debate Mode</text>
+  <text x="1122" y="290" fill="#F7DEF0" font-family="Segoe UI, Arial, sans-serif" font-size="19">Explicit bull-bear confrontation</text>
+  <rect x="1148" y="340" width="120" height="70" rx="14" fill="#4B233E"/><text x="1188" y="383" fill="#FFF0FA" font-family="Segoe UI, Arial, sans-serif" font-size="24">Bull</text>
+  <rect x="1338" y="340" width="120" height="70" rx="14" fill="#4B233E"/><text x="1377" y="383" fill="#FFF0FA" font-family="Segoe UI, Arial, sans-serif" font-size="24">Bear</text>
+  <rect x="1243" y="470" width="120" height="70" rx="14" fill="#5D2B4D"/><text x="1270" y="513" fill="#FFF0FA" font-family="Segoe UI, Arial, sans-serif" font-size="24">Moderator</text>
+  <rect x="1243" y="610" width="120" height="80" rx="14" fill="#6F335B"/><text x="1262" y="656" fill="#FFF0FA" font-family="Segoe UI, Arial, sans-serif" font-size="24">Final Signal</text>
+  <path d="M1268 375H1338" stroke="#D48ABF" stroke-width="5"/><polygon points="1330,375 1316,367 1316,383" fill="#D48ABF"/>
+  <path d="M1398 410V470" stroke="#D48ABF" stroke-width="5"/><polygon points="1398,488 1387,468 1409,468" fill="#D48ABF"/>
+  <path d="M1208 410V470" stroke="#D48ABF" stroke-width="5"/><polygon points="1208,488 1197,468 1219,468" fill="#D48ABF"/>
+  <path d="M1303 540V610" stroke="#D48ABF" stroke-width="5"/><polygon points="1303,628 1292,608 1314,608" fill="#D48ABF"/>
+
+  <rect x="80" y="836" width="1440" height="40" rx="12" fill="#101827"/>
+  <text x="120" y="863" fill="#B4C6DA" font-family="Segoe UI, Arial, sans-serif" font-size="18">
+    Single is cheaper and faster. Multi is clearer and more controllable. Debate is strongest for conflict-heavy reasoning, but slowest and most expensive.
+  </text>
+</svg>

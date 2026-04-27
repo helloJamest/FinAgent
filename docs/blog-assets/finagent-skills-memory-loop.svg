@@ -1,0 +1,61 @@
+<svg width="1600" height="940" viewBox="0 0 1600 940" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1600" height="940" fill="#09111B"/>
+  <rect x="28" y="28" width="1544" height="884" rx="28" fill="#0E1728" stroke="#21324B" stroke-width="2"/>
+  <text x="84" y="104" fill="#E6EEF8" font-family="Segoe UI, Arial, sans-serif" font-size="40" font-weight="700">
+    Skills, Memory, Reflection, and Learning Loop
+  </text>
+  <text x="84" y="144" fill="#90A5C1" font-family="Segoe UI, Arial, sans-serif" font-size="20">
+    The path from prebuilt domain knowledge to stored lessons, learned skills, and future prompt injections
+  </text>
+
+  <rect x="92" y="226" width="320" height="180" rx="22" fill="#14213D" stroke="#2B4A73"/>
+  <text x="124" y="274" fill="#98D8FF" font-family="Segoe UI, Arial, sans-serif" font-size="30" font-weight="700">Skills</text>
+  <text x="124" y="316" fill="#E0EBF8" font-family="Segoe UI, Arial, sans-serif" font-size="22">YAML / SKILL.md definitions</text>
+  <text x="124" y="350" fill="#E0EBF8" font-family="Segoe UI, Arial, sans-serif" font-size="22">router selects active skills</text>
+  <text x="124" y="384" fill="#E0EBF8" font-family="Segoe UI, Arial, sans-serif" font-size="22">skill agents produce opinions</text>
+
+  <rect x="474" y="226" width="320" height="180" rx="22" fill="#132A22" stroke="#2B6A53"/>
+  <text x="506" y="274" fill="#9DEFC0" font-family="Segoe UI, Arial, sans-serif" font-size="30" font-weight="700">Runtime Memory</text>
+  <text x="506" y="316" fill="#E4F7EB" font-family="Segoe UI, Arial, sans-serif" font-size="22">recent analysis history</text>
+  <text x="506" y="350" fill="#E4F7EB" font-family="Segoe UI, Arial, sans-serif" font-size="22">confidence calibration</text>
+  <text x="506" y="384" fill="#E4F7EB" font-family="Segoe UI, Arial, sans-serif" font-size="22">skill performance weighting</text>
+
+  <rect x="856" y="226" width="320" height="180" rx="22" fill="#3A2618" stroke="#7D4C26"/>
+  <text x="888" y="274" fill="#F7C58D" font-family="Segoe UI, Arial, sans-serif" font-size="30" font-weight="700">Reflection</text>
+  <text x="888" y="316" fill="#F9E7D7" font-family="Segoe UI, Arial, sans-serif" font-size="22">prediction vs actual</text>
+  <text x="888" y="350" fill="#F9E7D7" font-family="Segoe UI, Arial, sans-serif" font-size="22">lesson extraction</text>
+  <text x="888" y="384" fill="#F9E7D7" font-family="Segoe UI, Arial, sans-serif" font-size="22">prompt injection guidance</text>
+
+  <rect x="1238" y="226" width="270" height="180" rx="22" fill="#2E1F47" stroke="#63419B"/>
+  <text x="1270" y="274" fill="#D4C2FF" font-family="Segoe UI, Arial, sans-serif" font-size="30" font-weight="700">Learning Layer</text>
+  <text x="1270" y="316" fill="#EFE9FF" font-family="Segoe UI, Arial, sans-serif" font-size="22">episode store</text>
+  <text x="1270" y="350" fill="#EFE9FF" font-family="Segoe UI, Arial, sans-serif" font-size="22">skill memory</text>
+  <text x="1270" y="384" fill="#EFE9FF" font-family="Segoe UI, Arial, sans-serif" font-size="22">debate tracker</text>
+
+  <path d="M412 316H474" stroke="#667C98" stroke-width="6" stroke-linecap="round"/><polygon points="466,316 450,307 450,325" fill="#667C98"/>
+  <path d="M794 316H856" stroke="#667C98" stroke-width="6" stroke-linecap="round"/><polygon points="848,316 832,307 832,325" fill="#667C98"/>
+  <path d="M1176 316H1238" stroke="#667C98" stroke-width="6" stroke-linecap="round"/><polygon points="1230,316 1214,307 1214,325" fill="#667C98"/>
+
+  <rect x="180" y="502" width="1240" height="270" rx="28" fill="#111B2D" stroke="#243857"/>
+  <text x="220" y="556" fill="#E6EEF8" font-family="Segoe UI, Arial, sans-serif" font-size="32" font-weight="700">
+    Evolution Loop
+  </text>
+
+  <rect x="220" y="610" width="180" height="84" rx="16" fill="#173056"/><text x="256" y="660" fill="#ECF4FE" font-family="Segoe UI, Arial, sans-serif" font-size="24">Run Analysis</text>
+  <rect x="470" y="610" width="180" height="84" rx="16" fill="#1E3D35"/><text x="520" y="660" fill="#ECFFF7" font-family="Segoe UI, Arial, sans-serif" font-size="24">Store Result</text>
+  <rect x="720" y="610" width="180" height="84" rx="16" fill="#4B2E18"/><text x="756" y="660" fill="#FFF1E4" font-family="Segoe UI, Arial, sans-serif" font-size="24">Backtest</text>
+  <rect x="970" y="610" width="180" height="84" rx="16" fill="#552741"/><text x="1007" y="660" fill="#FFF0F8" font-family="Segoe UI, Arial, sans-serif" font-size="24">Extract Lesson</text>
+  <rect x="1220" y="610" width="160" height="84" rx="16" fill="#35244B"/><text x="1257" y="660" fill="#F1E9FF" font-family="Segoe UI, Arial, sans-serif" font-size="24">Reinject</text>
+
+  <path d="M400 652H470" stroke="#7591B3" stroke-width="5" stroke-linecap="round"/><polygon points="462,652 448,644 448,660" fill="#7591B3"/>
+  <path d="M650 652H720" stroke="#7591B3" stroke-width="5" stroke-linecap="round"/><polygon points="712,652 698,644 698,660" fill="#7591B3"/>
+  <path d="M900 652H970" stroke="#7591B3" stroke-width="5" stroke-linecap="round"/><polygon points="962,652 948,644 948,660" fill="#7591B3"/>
+  <path d="M1150 652H1220" stroke="#7591B3" stroke-width="5" stroke-linecap="round"/><polygon points="1212,652 1198,644 1198,660" fill="#7591B3"/>
+
+  <path d="M1300 610C1300 550 1210 520 1060 520H420C290 520 240 550 240 610" stroke="#3BA2C7" stroke-width="4" stroke-dasharray="10 10"/>
+  <polygon points="240,606 252,587 230,589" fill="#3BA2C7"/>
+
+  <text x="222" y="730" fill="#AFC2D9" font-family="Segoe UI, Arial, sans-serif" font-size="18">
+    The current project already uses parts of this loop in production paths, while some learning components are still an emerging capability layer.
+  </text>
+</svg>
