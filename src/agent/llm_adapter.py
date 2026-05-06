@@ -554,6 +554,12 @@ class LLMToolAdapter:
             call_kwargs.update(extra_litellm_params(model, self._config))
             response = litellm.completion(**call_kwargs)
 
+        logger.info(
+                "Agent _call_litellm_model reqeust: %s", openai_messages
+        )
+        logger.info(
+                "Agent _call_litellm_model response: %s", response.choices[0]
+        )
         return self._parse_litellm_response(response, model)
 
     def _get_temperature(self, model: str) -> float:

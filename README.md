@@ -2,7 +2,6 @@
 
 # 📈 FinAgent
 
-[![GitHub stars](https://img.shields.io/github/stars/helloJamest/FinAgent?style=social)](https://github.com/helloJamest/FinAgent/stargazers)
 [![CI](https://github.com/helloJamest/FinAgent/actions/workflows/ci.yml/badge.svg)](https://github.com/helloJamest/FinAgent/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
@@ -247,14 +246,6 @@ FinAgent/
 ## ⭐ Star 历史
 
 **如果觉得有用，请给个 ⭐ Star 支持一下！**
-
-<a href="https://star-history.com/#helloJamest/FinAgent&Date">
- <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=helloJamest/FinAgent&type=Date&theme=dark" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=helloJamest/FinAgent&type=Date" />
-   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=helloJamest/FinAgent&type=Date" />
- </picture>
-</a>
 
 ## ⚠️ 免责声明
 
