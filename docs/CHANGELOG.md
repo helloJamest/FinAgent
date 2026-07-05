@@ -26,6 +26,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - [测试] Web Vitest 环境补齐 canvas 与 scrollTo 浏览器 API mock，减少 jsdom 噪音并提升前端测试输出可信度
 - [测试] CI `web-gate` 补跑 Vitest，确保前端测试基线和 lint/build 一起作为阻断检查
 - [测试] 过滤 `lark_oapi` 传递依赖触发的 `pkg_resources` 弃用告警，让离线 pytest 基线只暴露项目自身或未处理告警
+- [修复] `backend-gate` 改为通过 `bash test.sh` 调用确定性检查，避免 CI runner 因 `test.sh` 未带可执行位而中断
 - [修复] `AGENT_MAX_STEPS` 在 orchestrator 多 Agent 模式下改为作为各子 Agent 的步数上限而非硬覆盖；TechnicalAgent 等高默认值 Agent 会被封顶，低默认值 Agent 保持原值，减少不必要的 LLM 调用膨胀与配额消耗。
 - [修复] **MiniMax-M2.7 模型连接测试支持** — 修复 LLM 通道连接测试在 MiniMax-M2.7 模型下返回 "Empty response" 的问题；增加了 `max_tokens` 上限（8→256）以容纳 MiniMax 思考过程，并添加 `content_blocks` 格式解析逻辑统一处理 MiniMax 响应格式差异。
 - [修复] 移除 `HistoryItem` 与 `ReportSummary` 响应 Schema 中 `sentiment_score` 的 `ge=0/le=100` 约束（fixes #942）——历史库中存储的超范围负值或大于 100 的情绪评分不再触发 Pydantic ValidationError，历史列表与详情接口恢复正常返回。
