@@ -1,0 +1,38 @@
+name: PR Review
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  pr-static-checks:
+    name: PR static checks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Check AI assets
+        run: python scripts/check_ai_assets.py
+
+      - name: Check PR template exists
+        run: test -f .github/PULL_REQUEST_TEMPLATE.md
+
+  ai-review-hook:
+    name: Optional AI review hook
+    runs-on: ubuntu-latest
+    continue-on-error: ${{ vars.AI_REVIEW_STRICT != 'true' }}
+    if: ${{ vars.AI_REVIEW_ENABLED == 'true' }}
+    steps:
+      - name: No reviewer configured
+        run: |
+          echo "AI_REVIEW_ENABLED is true, but no repository AI reviewer command is configured."
+          echo "Keep this job non-blocking unless AI_REVIEW_STRICT=true is intentionally enabled."

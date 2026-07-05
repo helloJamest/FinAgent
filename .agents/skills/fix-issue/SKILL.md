@@ -18,7 +18,7 @@
 
 ### Step 1: 确认分析基线
 
-检查 `.Codex/reviews/issues/issue-<number>.md` 是否存在；如果不存在，先补做 issue 分析或在本次修复中补齐最小分析结论。
+检查 `.claude/reviews/issues/issue-<number>.md` 是否存在；如果不存在，先补做 issue 分析或在本次修复中补齐最小分析结论。
 
 ### Step 2: 选择安全的工作方式
 
@@ -50,7 +50,7 @@
 
 ### Step 5: 更新 issue 分析文档
 
-在 `.Codex/reviews/issues/issue-<number>.md` 中补充：
+在 `.claude/reviews/issues/issue-<number>.md` 中补充：
 
 ```markdown
 ## Fix Implementation

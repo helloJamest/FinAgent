@@ -58,7 +58,7 @@ gh issue view <issue_number> --repo helloJamest/FinAgent --comments
 
 ### Step 5: 生成分析文档
 
-保存到 `.Codex/reviews/issues/issue-<number>.md`
+保存到 `.claude/reviews/issues/issue-<number>.md`
 
 ## Output Document Format
 

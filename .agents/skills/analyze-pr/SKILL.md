@@ -64,7 +64,7 @@ gh run view <run_id> --log-failed
 
 ### Step 5: 生成评审文档
 
-保存到 `.Codex/reviews/prs/pr-<number>.md`
+保存到 `.claude/reviews/prs/pr-<number>.md`
 
 ## Output Document Format
 
