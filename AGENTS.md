@@ -94,6 +94,7 @@ python -m py_compile <changed_python_files>
 cd apps/finagent-web
 npm ci
 npm run lint
+npm test
 npm run build
 
 cd ../finagent-desktop
@@ -137,7 +138,7 @@ gh run view <run_id> --log-failed
 | `ai-governance` | `.github/workflows/ci.yml` | 校验 `AGENTS.md` / `CLAUDE.md` / `.github` 指令 / `.claude/skills` 关系 | 是 |
 | `backend-gate` | `.github/workflows/ci.yml` | 执行 `./scripts/ci_gate.sh` | 是 |
 | `docker-build` | `.github/workflows/ci.yml` | Docker 构建与关键模块导入 smoke | 是 |
-| `web-gate` | `.github/workflows/ci.yml` | 前端改动时执行 `npm run lint` + `npm run build` | 是（触发时） |
+| `web-gate` | `.github/workflows/ci.yml` | 前端改动时执行 `npm run lint` + `npm test` + `npm run build` | 是（触发时） |
 | `network-smoke` | `.github/workflows/network-smoke.yml` | `pytest -m network` + `test.sh quick` | 否，观测项 |
 | `pr-review` | `.github/workflows/pr-review.yml` | PR 静态检查 + AI 审查 + 自动标签 | 否，辅助项 |
 
@@ -153,7 +154,7 @@ gh run view <run_id> --log-failed
 
 - Web 前端改动：
   - 适用范围：`apps/finagent-web/`
-  - 默认执行：`cd apps/finagent-web && npm ci && npm run lint && npm run build`
+  - 默认执行：`cd apps/finagent-web && npm ci && npm run lint && npm test && npm run build`
   - 若涉及 API 联调、路由、状态管理、Markdown/图表渲染或认证状态，交付说明中要明确说明联动面和未覆盖风险。
 
 - 桌面端改动：

@@ -1,9 +1,11 @@
+import re
 from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
 CHANGELOG = ROOT / "docs" / "CHANGELOG.md"
 ALLOWED_TYPES = {"新功能", "改进", "修复", "文档", "测试", "chore"}
+ENTRY_PATTERN = re.compile(r"^- \[(?P<type>[^\]]+)\] .+")
 
 
 def _unreleased_lines() -> list[str]:
@@ -23,7 +25,9 @@ def test_unreleased_changelog_uses_flat_allowed_types():
 
     assert entries
     for entry in entries:
-        entry_type = entry.split("]", 1)[0].removeprefix("- [")
+        match = ENTRY_PATTERN.match(entry)
+        assert match, entry
+        entry_type = match.group("type")
         assert entry_type in ALLOWED_TYPES, entry
 
 

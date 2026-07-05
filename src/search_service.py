@@ -23,7 +23,6 @@ from typing import List, Dict, Any, Optional, Tuple
 from itertools import cycle
 from urllib.parse import parse_qsl, unquote, urlparse
 import requests
-from newspaper import Article, Config
 from tenacity import (
     retry,
     stop_after_attempt,
@@ -79,6 +78,12 @@ def fetch_url_content(url: str, timeout: int = 5) -> str:
     """
     获取 URL 网页正文内容 (使用 newspaper3k)
     """
+    try:
+        from newspaper import Article, Config
+    except ImportError as e:
+        logger.debug(f"newspaper3k unavailable; skip fetching article content for {url}: {e}")
+        return ""
+
     try:
         # 配置 newspaper3k
         config = Config()

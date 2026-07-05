@@ -209,8 +209,8 @@ class TestStorage(unittest.TestCase):
 
             self.assertEqual(total, 1)
         finally:
-            temp_dir.cleanup()
             DatabaseManager.reset_instance()
+            temp_dir.cleanup()
 
 if __name__ == '__main__':
     unittest.main()
