@@ -1,0 +1,189 @@
+name: Daily Stock Analysis
+
+on:
+  schedule:
+    # 18:00 Asia/Shanghai, Monday-Friday.
+    - cron: "0 10 * * 1-5"
+  workflow_dispatch:
+    inputs:
+      stocks:
+        description: "Optional comma-separated stock list, e.g. 600519,hk00700,AAPL"
+        required: false
+        default: ""
+      force_run:
+        description: "Run even when the trading-day check would skip"
+        required: false
+        type: boolean
+        default: false
+      dry_run:
+        description: "Fetch data without running LLM analysis"
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: daily-analysis-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  analyze:
+    name: Run daily analysis
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      CI: "true"
+      GITHUB_ACTIONS: "true"
+      PYTHONUNBUFFERED: "1"
+
+      STOCK_LIST: ${{ vars.STOCK_LIST || secrets.STOCK_LIST }}
+      TRADING_DAY_CHECK_ENABLED: ${{ vars.TRADING_DAY_CHECK_ENABLED || secrets.TRADING_DAY_CHECK_ENABLED || 'true' }}
+      ENABLE_CHIP_DISTRIBUTION: ${{ vars.ENABLE_CHIP_DISTRIBUTION || secrets.ENABLE_CHIP_DISTRIBUTION || 'false' }}
+
+      LITELLM_MODEL: ${{ vars.LITELLM_MODEL || secrets.LITELLM_MODEL }}
+      AGENT_LITELLM_MODEL: ${{ vars.AGENT_LITELLM_MODEL || secrets.AGENT_LITELLM_MODEL }}
+      LITELLM_FALLBACK_MODELS: ${{ vars.LITELLM_FALLBACK_MODELS || secrets.LITELLM_FALLBACK_MODELS }}
+      LLM_CHANNELS: ${{ vars.LLM_CHANNELS || secrets.LLM_CHANNELS }}
+      VISION_MODEL: ${{ vars.VISION_MODEL || secrets.VISION_MODEL }}
+
+      GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS || vars.GEMINI_API_KEYS }}
+      GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY || vars.GEMINI_API_KEY }}
+      GEMINI_MODEL: ${{ vars.GEMINI_MODEL || secrets.GEMINI_MODEL }}
+      GEMINI_MODEL_FALLBACK: ${{ vars.GEMINI_MODEL_FALLBACK || secrets.GEMINI_MODEL_FALLBACK }}
+
+      OPENAI_API_KEYS: ${{ secrets.OPENAI_API_KEYS || vars.OPENAI_API_KEYS }}
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY || vars.OPENAI_API_KEY }}
+      OPENAI_BASE_URL: ${{ vars.OPENAI_BASE_URL || secrets.OPENAI_BASE_URL }}
+      OPENAI_MODEL: ${{ vars.OPENAI_MODEL || secrets.OPENAI_MODEL }}
+
+      AIHUBMIX_KEY: ${{ secrets.AIHUBMIX_KEY || vars.AIHUBMIX_KEY }}
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY || vars.ANTHROPIC_API_KEY }}
+      ANTHROPIC_MODEL: ${{ vars.ANTHROPIC_MODEL || secrets.ANTHROPIC_MODEL }}
+      DEEPSEEK_API_KEYS: ${{ secrets.DEEPSEEK_API_KEYS || vars.DEEPSEEK_API_KEYS }}
+      DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY || vars.DEEPSEEK_API_KEY }}
+
+      TAVILY_API_KEYS: ${{ secrets.TAVILY_API_KEYS || vars.TAVILY_API_KEYS }}
+      ANSPIRE_API_KEYS: ${{ secrets.ANSPIRE_API_KEYS || vars.ANSPIRE_API_KEYS }}
+      MINIMAX_API_KEYS: ${{ secrets.MINIMAX_API_KEYS || vars.MINIMAX_API_KEYS }}
+      BOCHA_API_KEYS: ${{ secrets.BOCHA_API_KEYS || vars.BOCHA_API_KEYS }}
+      BRAVE_API_KEYS: ${{ secrets.BRAVE_API_KEYS || vars.BRAVE_API_KEYS }}
+      SERPAPI_API_KEYS: ${{ secrets.SERPAPI_API_KEYS || vars.SERPAPI_API_KEYS }}
+      SEARXNG_BASE_URLS: ${{ vars.SEARXNG_BASE_URLS || secrets.SEARXNG_BASE_URLS }}
+      SEARXNG_PUBLIC_INSTANCES_ENABLED: ${{ vars.SEARXNG_PUBLIC_INSTANCES_ENABLED || secrets.SEARXNG_PUBLIC_INSTANCES_ENABLED }}
+
+      TUSHARE_TOKEN: ${{ secrets.TUSHARE_TOKEN || vars.TUSHARE_TOKEN }}
+      LONGBRIDGE_APP_KEY: ${{ secrets.LONGBRIDGE_APP_KEY || vars.LONGBRIDGE_APP_KEY }}
+      LONGBRIDGE_APP_SECRET: ${{ secrets.LONGBRIDGE_APP_SECRET || vars.LONGBRIDGE_APP_SECRET }}
+      LONGBRIDGE_ACCESS_TOKEN: ${{ secrets.LONGBRIDGE_ACCESS_TOKEN || vars.LONGBRIDGE_ACCESS_TOKEN }}
+      LONGBRIDGE_STATIC_INFO_TTL_SECONDS: ${{ vars.LONGBRIDGE_STATIC_INFO_TTL_SECONDS || secrets.LONGBRIDGE_STATIC_INFO_TTL_SECONDS }}
+      LONGBRIDGE_HTTP_URL: ${{ vars.LONGBRIDGE_HTTP_URL || secrets.LONGBRIDGE_HTTP_URL }}
+      LONGBRIDGE_QUOTE_WS_URL: ${{ vars.LONGBRIDGE_QUOTE_WS_URL || secrets.LONGBRIDGE_QUOTE_WS_URL }}
+      LONGBRIDGE_TRADE_WS_URL: ${{ vars.LONGBRIDGE_TRADE_WS_URL || secrets.LONGBRIDGE_TRADE_WS_URL }}
+      LONGBRIDGE_REGION: ${{ vars.LONGBRIDGE_REGION || secrets.LONGBRIDGE_REGION }}
+      LONGBRIDGE_ENABLE_OVERNIGHT: ${{ vars.LONGBRIDGE_ENABLE_OVERNIGHT || secrets.LONGBRIDGE_ENABLE_OVERNIGHT }}
+      LONGBRIDGE_PUSH_CANDLESTICK_MODE: ${{ vars.LONGBRIDGE_PUSH_CANDLESTICK_MODE || secrets.LONGBRIDGE_PUSH_CANDLESTICK_MODE }}
+      LONGBRIDGE_PRINT_QUOTE_PACKAGES: ${{ vars.LONGBRIDGE_PRINT_QUOTE_PACKAGES || secrets.LONGBRIDGE_PRINT_QUOTE_PACKAGES }}
+
+      MARKET_REVIEW_ENABLED: ${{ vars.MARKET_REVIEW_ENABLED || secrets.MARKET_REVIEW_ENABLED }}
+      MARKET_REVIEW_REGION: ${{ vars.MARKET_REVIEW_REGION || secrets.MARKET_REVIEW_REGION }}
+      SINGLE_STOCK_NOTIFY: ${{ vars.SINGLE_STOCK_NOTIFY || secrets.SINGLE_STOCK_NOTIFY }}
+      REPORT_TYPE: ${{ vars.REPORT_TYPE || secrets.REPORT_TYPE }}
+      REPORT_LANGUAGE: ${{ vars.REPORT_LANGUAGE || secrets.REPORT_LANGUAGE }}
+      REPORT_SUMMARY_ONLY: ${{ vars.REPORT_SUMMARY_ONLY || secrets.REPORT_SUMMARY_ONLY }}
+      REPORT_RENDERER_ENABLED: ${{ vars.REPORT_RENDERER_ENABLED || secrets.REPORT_RENDERER_ENABLED }}
+      REPORT_INTEGRITY_ENABLED: ${{ vars.REPORT_INTEGRITY_ENABLED || secrets.REPORT_INTEGRITY_ENABLED }}
+      REPORT_INTEGRITY_RETRY: ${{ vars.REPORT_INTEGRITY_RETRY || secrets.REPORT_INTEGRITY_RETRY }}
+      REPORT_HISTORY_COMPARE_N: ${{ vars.REPORT_HISTORY_COMPARE_N || secrets.REPORT_HISTORY_COMPARE_N }}
+      ANALYSIS_DELAY: ${{ vars.ANALYSIS_DELAY || secrets.ANALYSIS_DELAY }}
+      MERGE_EMAIL_NOTIFICATION: ${{ vars.MERGE_EMAIL_NOTIFICATION || secrets.MERGE_EMAIL_NOTIFICATION }}
+      MARKDOWN_TO_IMAGE_CHANNELS: ${{ vars.MARKDOWN_TO_IMAGE_CHANNELS || secrets.MARKDOWN_TO_IMAGE_CHANNELS }}
+      MARKDOWN_TO_IMAGE_MAX_CHARS: ${{ vars.MARKDOWN_TO_IMAGE_MAX_CHARS || secrets.MARKDOWN_TO_IMAGE_MAX_CHARS }}
+      MD2IMG_ENGINE: ${{ vars.MD2IMG_ENGINE || secrets.MD2IMG_ENGINE }}
+      PREFETCH_REALTIME_QUOTES: ${{ vars.PREFETCH_REALTIME_QUOTES || secrets.PREFETCH_REALTIME_QUOTES }}
+
+      WECHAT_WEBHOOK_URL: ${{ secrets.WECHAT_WEBHOOK_URL || vars.WECHAT_WEBHOOK_URL }}
+      WECHAT_MSG_TYPE: ${{ vars.WECHAT_MSG_TYPE || secrets.WECHAT_MSG_TYPE }}
+      FEISHU_WEBHOOK_URL: ${{ secrets.FEISHU_WEBHOOK_URL || vars.FEISHU_WEBHOOK_URL }}
+      FEISHU_WEBHOOK_SECRET: ${{ secrets.FEISHU_WEBHOOK_SECRET || vars.FEISHU_WEBHOOK_SECRET }}
+      FEISHU_WEBHOOK_KEYWORD: ${{ vars.FEISHU_WEBHOOK_KEYWORD || secrets.FEISHU_WEBHOOK_KEYWORD }}
+      FEISHU_APP_ID: ${{ secrets.FEISHU_APP_ID || vars.FEISHU_APP_ID }}
+      FEISHU_APP_SECRET: ${{ secrets.FEISHU_APP_SECRET || vars.FEISHU_APP_SECRET }}
+      FEISHU_FOLDER_TOKEN: ${{ secrets.FEISHU_FOLDER_TOKEN || vars.FEISHU_FOLDER_TOKEN }}
+      TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN || vars.TELEGRAM_BOT_TOKEN }}
+      TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID || vars.TELEGRAM_CHAT_ID }}
+      TELEGRAM_MESSAGE_THREAD_ID: ${{ vars.TELEGRAM_MESSAGE_THREAD_ID || secrets.TELEGRAM_MESSAGE_THREAD_ID }}
+      DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL || vars.DISCORD_WEBHOOK_URL }}
+      DISCORD_BOT_TOKEN: ${{ secrets.DISCORD_BOT_TOKEN || vars.DISCORD_BOT_TOKEN }}
+      DISCORD_MAIN_CHANNEL_ID: ${{ secrets.DISCORD_MAIN_CHANNEL_ID || vars.DISCORD_MAIN_CHANNEL_ID }}
+      DISCORD_CHANNEL_ID: ${{ secrets.DISCORD_CHANNEL_ID || vars.DISCORD_CHANNEL_ID }}
+      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL || vars.SLACK_WEBHOOK_URL }}
+      SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN || vars.SLACK_BOT_TOKEN }}
+      SLACK_CHANNEL_ID: ${{ secrets.SLACK_CHANNEL_ID || vars.SLACK_CHANNEL_ID }}
+      EMAIL_SENDER: ${{ secrets.EMAIL_SENDER || vars.EMAIL_SENDER }}
+      EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD || vars.EMAIL_PASSWORD }}
+      EMAIL_RECEIVERS: ${{ secrets.EMAIL_RECEIVERS || vars.EMAIL_RECEIVERS }}
+      EMAIL_SENDER_NAME: ${{ vars.EMAIL_SENDER_NAME || secrets.EMAIL_SENDER_NAME }}
+      PUSHOVER_USER_KEY: ${{ secrets.PUSHOVER_USER_KEY || vars.PUSHOVER_USER_KEY }}
+      PUSHOVER_API_TOKEN: ${{ secrets.PUSHOVER_API_TOKEN || vars.PUSHOVER_API_TOKEN }}
+      PUSHPLUS_TOKEN: ${{ secrets.PUSHPLUS_TOKEN || vars.PUSHPLUS_TOKEN }}
+      PUSHPLUS_TOPIC: ${{ vars.PUSHPLUS_TOPIC || secrets.PUSHPLUS_TOPIC }}
+      SERVERCHAN3_SENDKEY: ${{ secrets.SERVERCHAN3_SENDKEY || vars.SERVERCHAN3_SENDKEY }}
+      CUSTOM_WEBHOOK_URLS: ${{ secrets.CUSTOM_WEBHOOK_URLS || vars.CUSTOM_WEBHOOK_URLS }}
+      CUSTOM_WEBHOOK_BEARER_TOKEN: ${{ secrets.CUSTOM_WEBHOOK_BEARER_TOKEN || vars.CUSTOM_WEBHOOK_BEARER_TOKEN }}
+      WEBHOOK_VERIFY_SSL: ${{ vars.WEBHOOK_VERIFY_SSL || secrets.WEBHOOK_VERIFY_SSL }}
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+          cache-dependency-path: |
+            requirements.txt
+            requirements-ci.txt
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements-ci.txt
+
+      - name: Run analysis
+        env:
+          MANUAL_STOCKS: ${{ github.event.inputs.stocks || '' }}
+          FORCE_RUN: ${{ github.event.inputs.force_run || 'false' }}
+          DRY_RUN: ${{ github.event.inputs.dry_run || 'false' }}
+        run: |
+          python - <<'PY'
+          import os
+          import subprocess
+          import sys
+
+          args = [sys.executable, "main.py"]
+
+          stocks = (os.environ.get("MANUAL_STOCKS") or "").strip()
+          if stocks:
+              args.extend(["--stocks", stocks])
+
+          if (os.environ.get("FORCE_RUN") or "").lower() == "true":
+              args.append("--force-run")
+
+          if (os.environ.get("DRY_RUN") or "").lower() == "true":
+              args.append("--dry-run")
+
+          raise SystemExit(subprocess.call(args))
+          PY
+
+      - name: Upload logs and reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: analysis-reports
+          path: |
+            logs/
+            reports/
+          if-no-files-found: ignore
