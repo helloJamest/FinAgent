@@ -13,6 +13,7 @@ CLAUDE = ROOT / "CLAUDE.md"
 COPILOT = ROOT / ".github" / "copilot-instructions.md"
 INSTRUCTIONS_DIR = ROOT / ".github" / "instructions"
 CLAUDE_SKILLS_DIR = ROOT / ".claude" / "skills"
+AGENTS_SKILLS_DIR = ROOT / ".agents" / "skills"
 
 REQUIRED_INSTRUCTION_FILES = {
     "backend.instructions.md",
@@ -39,6 +40,13 @@ def fail(message: str) -> None:
     sys.exit(1)
 
 
+def normalize_windows_long_path(path: Path) -> Path:
+    text = str(path)
+    if text.startswith("\\\\?\\"):
+        return Path(text[4:])
+    return path
+
+
 def ensure_file_exists(path: Path, description: str) -> None:
     if not path.exists():
         fail(f"{description} is missing: {path.relative_to(ROOT)}")
@@ -51,7 +59,13 @@ def ensure_symlink() -> None:
     if not CLAUDE.is_symlink():
         fail("CLAUDE.md must be a symlink to AGENTS.md")
 
-    target = Path(CLAUDE.readlink())
+    target = normalize_windows_long_path(Path(CLAUDE.readlink()))
+    if target == Path("AGENTS.md"):
+        return
+    if target.is_absolute() and target.resolve() == AGENTS.resolve():
+        return
+    if not target.is_absolute() and (CLAUDE.parent / target).resolve() == AGENTS.resolve():
+        return
     if target != Path("AGENTS.md"):
         fail(f"CLAUDE.md must point to AGENTS.md, found: {target}")
 
@@ -89,6 +103,15 @@ def ensure_skill_files() -> None:
             if relative_path != "README.md" and "AGENTS.md" not in content:
                 fail(f"{path.relative_to(ROOT)} must reference AGENTS.md as the rule source")
 
+    ensure_file_exists(AGENTS_SKILLS_DIR, "agent skills mirror directory")
+    for relative_path in REQUIRED_SKILL_FILES - {"README.md"}:
+        claude_path = CLAUDE_SKILLS_DIR / relative_path
+        agents_path = AGENTS_SKILLS_DIR / relative_path
+        if not agents_path.exists():
+            fail(f"missing agent skill mirror: {agents_path.relative_to(ROOT)}")
+        if agents_path.read_text(encoding="utf-8") != claude_path.read_text(encoding="utf-8"):
+            fail(f"agent skill mirror is out of sync: {agents_path.relative_to(ROOT)}")
+
 
 def ensure_gitignore_rules() -> None:
     gitignore = (ROOT / ".gitignore").read_text(encoding="utf-8")
@@ -106,9 +129,10 @@ def ensure_no_tracked_claude_artifacts() -> None:
         check=True,
     )
     tracked = [line.strip() for line in result.stdout.splitlines() if line.strip()]
-    allowed_prefixes = (".claude/skills/",)
+    allowed_prefixes = (".claude/skills/", ".claude/hooks/")
+    allowed_files = {".claude/settings.json"}
     for path in tracked:
-        if path.startswith(allowed_prefixes):
+        if path in allowed_files or path.startswith(allowed_prefixes):
             continue
         fail(f"tracked .claude artifact outside skills/: {path}")
 
