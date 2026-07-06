@@ -83,5 +83,8 @@ jobs:
       - name: Lint web
         run: npm run lint
 
+      - name: Test web
+        run: npm test
+
       - name: Build web
         run: npm run build

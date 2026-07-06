@@ -142,6 +142,8 @@ class ValidateSystemConfigResponse(BaseModel):
 class TestLLMChannelRequest(BaseModel):
     """Request payload for testing one LLM channel."""
 
+    __test__ = False
+
     name: str = "channel"
     protocol: str = "openai"
     base_url: str = ""

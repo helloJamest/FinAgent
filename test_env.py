@@ -36,6 +36,13 @@ import sys
 from datetime import datetime, date, timedelta
 from typing import Optional
 
+if "pytest" in sys.modules:
+    import pytest
+
+    pytestmark = pytest.mark.skip(
+        reason="manual environment validation script; run python test_env.py directly"
+    )
+
 # 配置日志
 logging.basicConfig(
     level=logging.INFO,
@@ -324,9 +331,10 @@ def test_notification():
     service = NotificationService()
     
     print_section("配置检查")
-    if service.is_available():
+    webhook_url = config.wechat_webhook_url or ""
+    if webhook_url:
         print(f"  ✓ 企业微信 Webhook 已配置")
-        webhook_preview = config.wechat_webhook_url[:50] + "..." if len(config.wechat_webhook_url) > 50 else config.wechat_webhook_url
+        webhook_preview = webhook_url[:50] + "..." if len(webhook_url) > 50 else webhook_url
         print(f"    URL: {webhook_preview}")
     else:
         print(f"  ✗ 企业微信 Webhook 未配置")

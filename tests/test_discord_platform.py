@@ -4,10 +4,24 @@ import time
 from types import SimpleNamespace
 from unittest.mock import patch
 
-from nacl.signing import SigningKey
+import pytest
+
+try:
+    from nacl.signing import SigningKey
+except ModuleNotFoundError as exc:
+    if exc.name != "nacl":
+        raise
+    SigningKey = None
+    pytestmark = pytest.mark.skip(reason="PyNaCl is not installed")
+else:
+    pytestmark = []
 
 from bot.models import ChatType
-from bot.platforms.discord import DiscordPlatform
+
+if SigningKey is not None:
+    from bot.platforms.discord import DiscordPlatform
+else:
+    DiscordPlatform = None
 
 
 def _make_platform(public_key: str) -> DiscordPlatform:

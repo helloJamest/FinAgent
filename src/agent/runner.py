@@ -570,10 +570,16 @@ def run_agent_loop(
             if progress_callback:
                 progress_callback({"type": "generating", "step": step + 1, "message": "正在生成最终分析..."})
 
-            # Stream the final answer content chunk-by-chunk via progress_callback
-            final_content = _stream_final_answer(
-                messages, tool_decls, llm_adapter, remaining_timeout, progress_callback,
-            )
+            final_content = response.content or ""
+            if progress_callback:
+                # Stream chunks for callers that surface live progress.  Fall
+                # back to the already received response if the stream yields no
+                # content, which keeps non-streaming adapters and tests honest.
+                streamed_content = _stream_final_answer(
+                    messages, tool_decls, llm_adapter, remaining_timeout, progress_callback,
+                )
+                if streamed_content:
+                    final_content = streamed_content
             is_error = False
 
             return RunLoopResult(

@@ -17,8 +17,8 @@ flake8_checks() {
 
 deterministic_checks() {
   echo "==> backend-gate: local deterministic checks"
-  ./test.sh code
-  ./test.sh yfinance
+  bash test.sh code
+  bash test.sh yfinance
 }
 
 offline_test_suite() {

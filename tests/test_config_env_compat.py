@@ -58,12 +58,14 @@ class ConfigEnvCompatibilityTestCase(unittest.TestCase):
         _mock_parse_yaml,
         _mock_setup_env,
     ) -> None:
-        env = {
-            "RUN_IMMEDIATELY": "false",
-        }
+        with tempfile.TemporaryDirectory() as temp_dir:
+            env = {
+                "ENV_FILE": str(Path(temp_dir) / ".env"),
+                "RUN_IMMEDIATELY": "false",
+            }
 
-        with patch.dict(os.environ, env, clear=True):
-            config = Config._load_from_env()
+            with patch.dict(os.environ, env, clear=True):
+                config = Config._load_from_env()
 
         self.assertFalse(config.schedule_run_immediately)
         self.assertFalse(config.run_immediately)
@@ -93,12 +95,14 @@ class ConfigEnvCompatibilityTestCase(unittest.TestCase):
         _mock_parse_yaml,
         _mock_setup_env,
     ) -> None:
-        env = {
-            "RUN_IMMEDIATELY": "",
-        }
+        with tempfile.TemporaryDirectory() as temp_dir:
+            env = {
+                "ENV_FILE": str(Path(temp_dir) / ".env"),
+                "RUN_IMMEDIATELY": "",
+            }
 
-        with patch.dict(os.environ, env, clear=True):
-            config = Config._load_from_env()
+            with patch.dict(os.environ, env, clear=True):
+                config = Config._load_from_env()
 
         self.assertFalse(config.schedule_run_immediately)
         self.assertFalse(config.run_immediately)

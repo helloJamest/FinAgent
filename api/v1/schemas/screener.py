@@ -23,11 +23,14 @@ class ScreenerScreenRequest(BaseModel):
     analyze_after_screen: bool = Field(default=False, description="筛选后是否进行分析")
 
 
-class TaskAccepted(BaseModel):
+class ScreenerTaskAccepted(BaseModel):
     """任务已接受响应"""
     task_id: str = Field(..., description="任务ID")
     status: str = Field(default="accepted", description="状态")
     message: str = Field(default="筛选任务已接受", description="消息")
+
+
+TaskAccepted = ScreenerTaskAccepted
 
 
 class ScreenerResultResponse(BaseModel):
