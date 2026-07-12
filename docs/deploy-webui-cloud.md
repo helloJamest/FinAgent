@@ -304,6 +304,12 @@ ADMIN_AUTH_ENABLED=true
 
 重启服务后，第一次访问网页时会要求设置初始密码。设置完成后，每次打开设置页面都需要输入密码，可以防止 API Key 等敏感配置被他人看到。
 
+从本版本起，如果服务监听 `0.0.0.0` 或 `::` 且 `ADMIN_AUTH_ENABLED=false`，FinAgent 会拒绝启动，避免把分析、历史记录和配置接口误暴露到公网。仅在受信任内网或临时排障场景下，才可以显式设置：
+
+```env
+FINAGENT_ALLOW_INSECURE_PUBLIC_BIND=true
+```
+
 > 如果忘了密码，可以在服务器上执行：`python -m src.auth reset_password`
 
 ---

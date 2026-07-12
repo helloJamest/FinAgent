@@ -20,6 +20,12 @@ from starlette.middleware.base import BaseHTTPMiddleware
 
 logger = logging.getLogger(__name__)
 
+INTERNAL_ERROR_RESPONSE = {
+    "error": "internal_error",
+    "message": "Internal server error",
+    "detail": None,
+}
+
 
 class ErrorHandlerMiddleware(BaseHTTPMiddleware):
     """
@@ -59,11 +65,7 @@ class ErrorHandlerMiddleware(BaseHTTPMiddleware):
             # 返回统一格式的错误响应
             return JSONResponse(
                 status_code=500,
-                content={
-                    "error": "internal_error",
-                    "message": "服务器内部错误，请稍后重试",
-                    "detail": str(e) if logger.isEnabledFor(logging.DEBUG) else None
-                }
+                content=INTERNAL_ERROR_RESPONSE,
             )
 
 
@@ -82,6 +84,19 @@ def add_error_handlers(app) -> None:
     @app.exception_handler(HTTPException)
     async def http_exception_handler(request: Request, exc: HTTPException):
         """处理 HTTP 异常"""
+        if exc.status_code >= 500:
+            logger.error(
+                "HTTPException %s at %s %s: %s",
+                exc.status_code,
+                request.method,
+                request.url.path,
+                exc.detail,
+            )
+            return JSONResponse(
+                status_code=exc.status_code,
+                content=INTERNAL_ERROR_RESPONSE,
+            )
+
         # 如果 detail 已经是 ErrorResponse 格式的 dict，直接使用
         if isinstance(exc.detail, dict) and "error" in exc.detail and "message" in exc.detail:
             return JSONResponse(
@@ -120,9 +135,5 @@ def add_error_handlers(app) -> None:
         )
         return JSONResponse(
             status_code=500,
-            content={
-                "error": "internal_error",
-                "message": "服务器内部错误",
-                "detail": None
-            }
+            content=INTERNAL_ERROR_RESPONSE,
         )

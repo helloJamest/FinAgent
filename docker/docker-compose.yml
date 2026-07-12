@@ -34,6 +34,8 @@ x-common: &common
 
     # Web/API service bind address (must be 0.0.0.0 inside container)
     - WEBUI_HOST=0.0.0.0
+    # The server service publishes API_PORT to the host, so auth defaults on.
+    - ADMIN_AUTH_ENABLED=${ADMIN_AUTH_ENABLED:-true}
     # API_PORT 从 .env 文件读取，无需在此硬编码
 
     # 代理设置（如果需要）

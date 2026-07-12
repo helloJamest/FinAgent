@@ -389,6 +389,34 @@ class MainScheduleModeTestCase(unittest.TestCase):
         self.assertEqual(exit_code, 0)
         run_mock.assert_called_once()
 
+    def test_public_bind_requires_auth_when_insecure_override_absent(self) -> None:
+        with patch.dict(os.environ, {"FINAGENT_ALLOW_INSECURE_PUBLIC_BIND": "false"}, clear=False), \
+             patch("src.auth.is_auth_enabled", return_value=False):
+            with self.assertRaisesRegex(RuntimeError, "ADMIN_AUTH_ENABLED=true"):
+                main.enforce_public_bind_auth("0.0.0.0")
+
+    def test_public_bind_allows_loopback_without_auth(self) -> None:
+        with patch("src.auth.is_auth_enabled", side_effect=AssertionError("loopback should not check auth")):
+            main.enforce_public_bind_auth("127.0.0.1")
+
+    def test_public_bind_allows_explicit_insecure_override(self) -> None:
+        with patch.dict(os.environ, {"FINAGENT_ALLOW_INSECURE_PUBLIC_BIND": "true"}, clear=False), \
+             patch("src.auth.is_auth_enabled", return_value=False):
+            main.enforce_public_bind_auth("0.0.0.0")
+
+    def test_main_returns_nonzero_when_server_startup_guard_fails(self) -> None:
+        args = self._make_args(serve_only=True, host="0.0.0.0")
+        config = self._make_config()
+
+        with patch("main.parse_arguments", return_value=args), \
+             patch("main.get_config", return_value=config), \
+             patch("main.setup_logging"), \
+             patch("main.prepare_webui_frontend_assets", return_value=True), \
+             patch("main.start_api_server", side_effect=RuntimeError("guard failed")):
+            exit_code = main.main()
+
+        self.assertEqual(exit_code, 1)
+
     def test_run_full_analysis_import_failure_propagates(self) -> None:
         """P1: import failures in run_full_analysis must propagate, not be swallowed."""
         args = self._make_args()

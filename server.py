@@ -45,6 +45,9 @@ __all__ = ['app']
 
 if __name__ == "__main__":
     import uvicorn
+    from main import enforce_public_bind_auth
+
+    enforce_public_bind_auth("0.0.0.0")
 
     uvicorn.run(
         "server:app",

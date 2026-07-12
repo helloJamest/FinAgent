@@ -21,6 +21,7 @@ A股自选股智能分析系统 - 主调度程序
 - 效率优先：关注筹码集中度好的股票
 - 买点偏好：缩量回踩 MA5/MA10 支撑
 """
+import ipaddress
 import os
 from pathlib import Path
 from typing import Dict, Optional
@@ -606,6 +607,8 @@ def start_api_server(host: str, port: int, config: Config) -> None:
     import threading
     import uvicorn
 
+    enforce_public_bind_auth(host)
+
     def run_server():
         level_name = (config.log_level or "INFO").lower()
         uvicorn.run(
@@ -625,6 +628,41 @@ def _is_truthy_env(var_name: str, default: str = "true") -> bool:
     """Parse common truthy / falsy environment values."""
     value = os.getenv(var_name, default).strip().lower()
     return value not in {"0", "false", "no", "off"}
+
+
+def _is_public_bind_address(host: str) -> bool:
+    normalized = (host or "").strip().lower().strip("[]")
+    if normalized in {"", "*"}:
+        return True
+
+    try:
+        return ipaddress.ip_address(normalized).is_unspecified
+    except ValueError:
+        return False
+
+
+def enforce_public_bind_auth(host: str) -> None:
+    """Refuse public Web/API binds unless auth is enabled or explicitly waived."""
+    if not _is_public_bind_address(host):
+        return
+
+    from src.auth import is_auth_enabled
+
+    if is_auth_enabled():
+        return
+
+    if _is_truthy_env("FINAGENT_ALLOW_INSECURE_PUBLIC_BIND", "false"):
+        logger.warning(
+            "Starting public Web/API listener with ADMIN_AUTH_ENABLED=false because "
+            "FINAGENT_ALLOW_INSECURE_PUBLIC_BIND=true is set."
+        )
+        return
+
+    raise RuntimeError(
+        "Refusing to start public Web/API listener with ADMIN_AUTH_ENABLED=false. "
+        "Set ADMIN_AUTH_ENABLED=true before binding to 0.0.0.0/::, or set "
+        "FINAGENT_ALLOW_INSECURE_PUBLIC_BIND=true only for a trusted private network."
+    )
 
 
 def start_bot_stream_clients(config: Config) -> None:
@@ -783,6 +821,7 @@ def main() -> int:
             bot_clients_started = True
         except Exception as e:
             logger.error(f"启动 FastAPI 服务失败: {e}")
+            return 1
 
     if bot_clients_started:
         start_bot_stream_clients(config)
