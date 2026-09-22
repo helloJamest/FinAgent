@@ -11,7 +11,7 @@ class CamelModelAdapter:
     def __init__(self, config: Any):
         self.config = config
 
-    def create_agent(self, role: str, system_prompt: str):
+    def create_agent(self, role: str, system_prompt: str, step_timeout=None):
         try:
             from camel.agents import ChatAgent
             from camel.models import ModelFactory
@@ -43,9 +43,11 @@ class CamelModelAdapter:
                 "max_tokens": int(getattr(self.config, "camel_max_tokens", 4096)),
             },
         )
+        configured_timeout = float(getattr(self.config, "agent_orchestrator_timeout_s", 600) or 600)
+        effective_timeout = float(step_timeout) if step_timeout and step_timeout > 0 else configured_timeout
         return ChatAgent(
             system_message=system_prompt,
             model=model,
             max_iteration=1,
-            step_timeout=float(getattr(self.config, "agent_orchestrator_timeout_s", 600) or 600),
+            step_timeout=effective_timeout,
         )

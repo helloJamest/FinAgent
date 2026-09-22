@@ -95,7 +95,7 @@ def test_camel_backend_runs_roles_and_returns_normalized_result(monkeypatch):
             return SimpleNamespace(msg=SimpleNamespace(content=payload))
 
     class FakeAdapter:
-        def create_agent(self, role, system_prompt):
+        def create_agent(self, role, system_prompt, step_timeout=None):
             return FakeAgent(role)
 
     backend = CamelDebateBackend(
@@ -107,6 +107,38 @@ def test_camel_backend_runs_roles_and_returns_normalized_result(monkeypatch):
     assert result.success is True
     assert result.final_signal == "buy"
     assert calls == ["bull", "bear", "risk", "moderator"]
+
+
+def test_camel_backend_passes_remaining_timeout_to_agents():
+    from src.agent.debate.camel_backend import CamelDebateBackend
+
+    timeouts = []
+
+    class FakeAgent:
+        def __init__(self, role):
+            self.role = role
+
+        def step(self, _message):
+            if self.role == "moderator":
+                payload = '{"final_signal":"hold","confidence":0.5}'
+            else:
+                payload = '{"signal":"hold","confidence":0.5}'
+            return SimpleNamespace(msg=SimpleNamespace(content=payload))
+
+    class TimeoutAwareAdapter:
+        def create_agent(self, role, _system_prompt, step_timeout=None):
+            timeouts.append(step_timeout)
+            return FakeAgent(role)
+
+    backend = CamelDebateBackend(
+        config=SimpleNamespace(debate_max_rounds=1),
+        model_adapter=TimeoutAwareAdapter(),
+    )
+    result = backend.debate(make_context(), timeout=10)
+
+    assert result.success is True
+    assert timeouts
+    assert all(timeout is not None and timeout > 0 for timeout in timeouts)
 
 
 def test_camel_backend_uses_internal_backend_on_execution_failure():
@@ -134,6 +166,33 @@ def test_camel_backend_uses_internal_backend_on_execution_failure():
     assert result.success is True
     assert result.final_signal == "hold"
     fallback.debate.assert_called_once()
+
+
+def test_camel_backend_returns_failure_when_internal_fallback_also_fails():
+    from src.agent.debate.camel_backend import CamelDebateBackend
+
+    fallback = MagicMock()
+    fallback.debate.side_effect = RuntimeError("internal unavailable")
+
+    class BrokenAdapter:
+        def create_agent(self, _role, _system_prompt, step_timeout=None):
+            raise RuntimeError("camel unavailable")
+
+    backend = CamelDebateBackend(
+        config=SimpleNamespace(
+            debate_max_rounds=1,
+            debate_fallback_backend="internal",
+        ),
+        model_adapter=BrokenAdapter(),
+        fallback=fallback,
+    )
+
+    result = backend.debate(make_context())
+
+    assert result.success is False
+    assert result.fallback_used is True
+    assert result.backend == "internal"
+    assert result.error == "CAMEL debate and internal fallback failed"
 
 
 def test_non_debate_factory_does_not_import_camel(monkeypatch):
@@ -188,3 +247,90 @@ def test_debate_factory_selects_camel_backend(monkeypatch):
     executor = factory.build_agent_executor(config)
 
     assert isinstance(executor.debate_backend, CamelDebateBackend)
+
+
+def test_debate_config_rejects_camel_as_fallback_backend():
+    from src.config import Config
+
+    config = Config(agent_arch="debate", debate_fallback_backend="camel")
+
+    assert config.debate_fallback_backend == "internal"
+
+
+def test_debate_synthesis_normalizes_dashboard_and_applies_risk_override():
+    from src.agent.debate.debate_protocols import DebateResult
+    from src.agent.debate_orchestrator import DebateOrchestrator
+
+    config = SimpleNamespace(agent_risk_override=True)
+    orchestrator = DebateOrchestrator(
+        tool_registry=MagicMock(),
+        llm_adapter=MagicMock(),
+        config=config,
+    )
+    context = make_context()
+    context.add_risk_flag("regulatory", "重大监管风险", severity="high")
+    context.opinions.append(
+        AgentOpinion(
+            agent_name="risk",
+            signal="sell",
+            confidence=0.9,
+            reasoning="存在重大风险",
+            raw_data={"veto_buy": True},
+        )
+    )
+    context.meta["response_mode"] = "dashboard"
+    debate_result = DebateResult(
+        success=True,
+        final_signal="buy",
+        final_confidence=0.8,
+        final_reasoning="多方证据较强",
+        dashboard={"decision_type": "buy", "analysis_summary": "多方证据较强"},
+    )
+
+    content = orchestrator._run_decision_synthesis(context, debate_result)
+
+    assert content
+    assert debate_result.dashboard["decision_type"] == "hold"
+    assert debate_result.dashboard["dashboard"]["core_conclusion"]["signal_type"] == "🟡持有观望"
+    assert debate_result.dashboard["key_points"]
+    assert next(op for op in context.opinions if op.agent_name == "camel_moderator").signal == "hold"
+
+
+def test_chat_synthesis_includes_camel_moderator_opinion(monkeypatch):
+    from src.agent.agents import decision_agent as decision_agent_module
+    from src.agent.debate.debate_protocols import DebateResult
+    from src.agent.debate_orchestrator import DebateOrchestrator
+
+    seen_agents = []
+
+    class FakeDecisionAgent:
+        def __init__(self, **_kwargs):
+            pass
+
+        def run(self, context, progress_callback=None):
+            seen_agents.extend(op.agent_name for op in context.opinions)
+            context.set_data("final_response_text", "基于辩论结果的回答")
+            return SimpleNamespace(success=True, meta={})
+
+    monkeypatch.setattr(decision_agent_module, "DecisionAgent", FakeDecisionAgent)
+    orchestrator = DebateOrchestrator(
+        tool_registry=MagicMock(),
+        llm_adapter=MagicMock(),
+        config=SimpleNamespace(agent_risk_override=True),
+    )
+    context = make_context()
+    context.meta["response_mode"] = "chat"
+    context.opinions.append(AgentOpinion(agent_name="technical", signal="buy", confidence=0.6))
+
+    content = orchestrator._run_decision_synthesis(
+        context,
+        DebateResult(
+            success=True,
+            final_signal="buy",
+            final_confidence=0.8,
+            final_reasoning="辩论裁决",
+        ),
+    )
+
+    assert content == "基于辩论结果的回答"
+    assert "camel_moderator" in seen_agents

@@ -42,6 +42,12 @@ class CamelDebateBackend:
         return self.model_adapter
 
     @staticmethod
+    def _remaining_timeout(started: float, timeout: Optional[float]) -> Optional[float]:
+        if timeout is None or timeout <= 0:
+            return None
+        return max(0.0, timeout - (time.monotonic() - started))
+
+    @staticmethod
     def _response_text(response: Any) -> str:
         message = getattr(response, "msg", None)
         if message is not None and getattr(message, "content", None):
@@ -120,20 +126,29 @@ class CamelDebateBackend:
                 risk=risk_opinion,
             )
             adapter = self._get_model_adapter()
-            agents = {role: adapter.create_agent(role, prompt) for role, prompt in _ROLE_PROMPTS.items()}
             serialized_input = self._serialize_input(input_data)
             rounds = []
             moderator_payload: Dict[str, Any] = {}
 
+            def create_agent(role: str) -> Any:
+                remaining = self._remaining_timeout(started, timeout)
+                if timeout and remaining <= 0:
+                    raise TimeoutError("CAMEL debate timed out before the next agent call")
+                return adapter.create_agent(
+                    role,
+                    _ROLE_PROMPTS[role],
+                    step_timeout=remaining,
+                )
+
             for round_number in range(1, self.max_rounds + 1):
-                if timeout and time.monotonic() - started >= timeout:
+                if timeout and self._remaining_timeout(started, timeout) <= 0:
                     raise TimeoutError("CAMEL debate timed out before the next round")
                 prior = json.dumps([asdict(item) for item in rounds[-2:]], ensure_ascii=False, default=str)
                 common = f"股票输入快照：\n{serialized_input}\n上一轮摘要：\n{prior}"
-                bull_payload = self._ask_json(agents["bull"], common, "bull", progress_callback)
-                bear_payload = self._ask_json(agents["bear"], common, "bear", progress_callback)
+                bull_payload = self._ask_json(create_agent("bull"), common, "bull", progress_callback)
+                bear_payload = self._ask_json(create_agent("bear"), common, "bear", progress_callback)
                 risk_payload = self._ask_json(
-                    agents["risk"],
+                    create_agent("risk"),
                     f"{common}\n多方：{json.dumps(bull_payload, ensure_ascii=False)}\n空方：{json.dumps(bear_payload, ensure_ascii=False)}",
                     "risk",
                     progress_callback,
@@ -146,7 +161,7 @@ class CamelDebateBackend:
                 )
                 rounds.append(current_round)
                 moderator_payload = self._ask_json(
-                    agents["moderator"],
+                    create_agent("moderator"),
                     f"{common}\n当前辩论轮次：{json.dumps(asdict(current_round), ensure_ascii=False, default=str)}\n"
                     "请输出 final_signal、confidence、reasoning、consensus_reached、dashboard。",
                     "moderator",
@@ -165,16 +180,28 @@ class CamelDebateBackend:
             return result
         except Exception as exc:
             logger.warning("[CamelDebateBackend] CAMEL debate failed: %s", exc)
+            remaining_timeout = self._remaining_timeout(started, timeout)
+            if timeout and remaining_timeout <= 0:
+                return DebateResult(success=False, backend="camel", error="CAMEL debate timed out")
             if self.fallback is not None and getattr(self.config, "debate_fallback_backend", "internal") == "internal":
-                result = self.fallback.debate(
-                    context,
-                    technical_opinion=technical_opinion,
-                    intel_opinion=intel_opinion,
-                    risk_opinion=risk_opinion,
-                    progress_callback=progress_callback,
-                    timeout=timeout,
-                )
-                result.fallback_used = True
-                result.backend = "internal"
-                return result
+                try:
+                    result = self.fallback.debate(
+                        context,
+                        technical_opinion=technical_opinion,
+                        intel_opinion=intel_opinion,
+                        risk_opinion=risk_opinion,
+                        progress_callback=progress_callback,
+                        timeout=remaining_timeout,
+                    )
+                    result.fallback_used = True
+                    result.backend = "internal"
+                    return result
+                except Exception as fallback_exc:
+                    logger.warning("[CamelDebateBackend] internal fallback failed: %s", fallback_exc)
+                    return DebateResult(
+                        success=False,
+                        backend="internal",
+                        fallback_used=True,
+                        error="CAMEL debate and internal fallback failed",
+                    )
             return DebateResult(success=False, backend="camel", error="CAMEL debate failed")

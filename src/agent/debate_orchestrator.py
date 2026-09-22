@@ -17,6 +17,7 @@ from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional
 
 from src.agent.llm_adapter import LLMToolAdapter
+from src.agent.orchestrator import AgentOrchestrator
 from src.agent.protocols import (
     AgentContext,
     AgentOpinion,
@@ -52,7 +53,7 @@ class DebateOrchestratorResult:
     debate_result: Optional[Any] = None
 
 
-class DebateOrchestrator:
+class DebateOrchestrator(AgentOrchestrator):
     """Debate-mode orchestrator.
 
     Pipeline: Technical → Intel → [Risk] → DebateArena → Decision
@@ -72,16 +73,18 @@ class DebateOrchestrator:
         debate_tracker=None,
         debate_backend=None,
     ):
-        self.tool_registry = tool_registry
-        self.llm_adapter = llm_adapter
-        self.skill_instructions = skill_instructions
-        self.technical_skill_policy = technical_skill_policy
-        self.max_steps = max_steps
-        self.skill_manager = skill_manager
-        self.config = config
-        self.skill_memory = skill_memory
-        self.episode_store = episode_store
-        self.debate_tracker = debate_tracker
+        super().__init__(
+            tool_registry=tool_registry,
+            llm_adapter=llm_adapter,
+            skill_instructions=skill_instructions,
+            technical_skill_policy=technical_skill_policy,
+            max_steps=max_steps,
+            config=config,
+            skill_manager=skill_manager,
+            skill_memory=skill_memory,
+            episode_store=episode_store,
+            debate_tracker=debate_tracker,
+        )
         self.debate_backend = debate_backend
 
     def _get_timeout_seconds(self) -> int:
@@ -257,14 +260,10 @@ class DebateOrchestrator:
                 debate_result=debate_result,
             )
 
-        # Step 5: Synthesize via DecisionAgent for readable output
-        dashboard = debate_result.dashboard
-        if dashboard:
-            ctx.set_data("final_dashboard", dashboard)
-
         # Run DecisionAgent to synthesize debate result into natural language (chat)
         # or structured dashboard (non-chat), matching standard mode behavior.
         decision_content = self._run_decision_synthesis(ctx, debate_result)
+        dashboard = debate_result.dashboard
 
         return DebateOrchestratorResult(
             success=bool(decision_content),
@@ -398,10 +397,31 @@ class DebateOrchestrator:
         }
         ctx.set_data("debate_result", debate_summary)
 
-        # Add debate opinions to ctx.opinions list (DecisionAgent reads these)
-        for advocate_name in ("bull_advocate", "bear_advocate"):
-            if ctx.opinions:
-                break  # already has opinions from technical/intel/risk stages
+        moderator_opinion = AgentOpinion(
+            agent_name="camel_moderator",
+            signal=debate_result.final_signal,
+            confidence=debate_result.final_confidence,
+            reasoning=debate_result.final_reasoning,
+            raw_data=debate_result.dashboard or {},
+        )
+        if not any(op.agent_name == moderator_opinion.agent_name for op in ctx.opinions):
+            ctx.opinions.append(moderator_opinion)
+
+        dashboard = self._normalize_dashboard_payload(debate_result.dashboard or {}, ctx)
+        if dashboard is not None:
+            ctx.set_data("final_dashboard", dashboard)
+            self._apply_risk_override(ctx)
+            dashboard = ctx.get_data("final_dashboard") or dashboard
+            debate_result.dashboard = dashboard
+            debate_result.final_signal = normalize_decision_signal(
+                dashboard.get("decision_type", debate_result.final_signal)
+            )
+            moderator_opinion.signal = debate_result.final_signal
+            moderator_opinion.raw_data = dashboard
+            if isinstance(dashboard.get("analysis_summary"), str):
+                moderator_opinion.reasoning = dashboard["analysis_summary"]
+
+        # Add advocate opinions only when the earlier stages produced none.
         if not ctx.opinions:
             # Create synthetic opinions from debate rounds
             if debate_result.all_rounds:

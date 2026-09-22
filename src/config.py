@@ -796,6 +796,7 @@ class Config:
     _VALID_ORCHESTRATOR_MODES = {"quick", "standard", "full", "specialist"}
     _VALID_SKILL_ROUTING = {"auto", "manual"}
     _VALID_DEBATE_BACKENDS = {"camel", "internal"}
+    _VALID_DEBATE_FALLBACK_BACKENDS = {"internal"}
     _VALID_CAMEL_PLATFORMS = {"openai_compatible"}
     _WEBUI_RUNTIME_ENV_FILE_PRIORITY_KEYS = frozenset(
         {
@@ -842,11 +843,11 @@ class Config:
                 self._VALID_DEBATE_BACKENDS,
             )
             object.__setattr__(self, "debate_backend", "camel")
-        if self.debate_fallback_backend not in self._VALID_DEBATE_BACKENDS:
+        if self.debate_fallback_backend not in self._VALID_DEBATE_FALLBACK_BACKENDS:
             _log.warning(
                 "Invalid DEBATE_FALLBACK_BACKEND=%r, falling back to 'internal'. Valid: %s",
                 self.debate_fallback_backend,
-                self._VALID_DEBATE_BACKENDS,
+                self._VALID_DEBATE_FALLBACK_BACKENDS,
             )
             object.__setattr__(self, "debate_fallback_backend", "internal")
         if self.camel_model_platform not in self._VALID_CAMEL_PLATFORMS:
