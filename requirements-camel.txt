@@ -1,0 +1,5 @@
+# Optional dependency for the CAMEL-backed debate architecture.
+# Install this file only when AGENT_ARCH=debate is configured.
+camel-ai>=0.2.90,<0.3.0
+# CAMEL 0.2.90 imports FastMCP from the MCP 1.x namespace.
+mcp>=1.3.0,<2.0.0

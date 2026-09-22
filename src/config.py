@@ -542,6 +542,14 @@ class Config:
     debate_max_rounds: int = 3
     debate_consensus_threshold: float = 0.8
     debate_signal_convergence: int = 1
+    debate_backend: str = "camel"
+    debate_fallback_backend: str = "internal"
+    camel_model_platform: str = "openai_compatible"
+    camel_model_name: str = ""
+    camel_base_url: str = ""
+    camel_api_key: Optional[str] = None
+    camel_temperature: float = 0.1
+    camel_max_tokens: int = 4096
 
     # Reflection mode settings
     reflection_enabled: bool = False
@@ -787,6 +795,9 @@ class Config:
     _VALID_AGENT_ARCH = {"single", "multi", "debate"}
     _VALID_ORCHESTRATOR_MODES = {"quick", "standard", "full", "specialist"}
     _VALID_SKILL_ROUTING = {"auto", "manual"}
+    _VALID_DEBATE_BACKENDS = {"camel", "internal"}
+    _VALID_DEBATE_FALLBACK_BACKENDS = {"internal"}
+    _VALID_CAMEL_PLATFORMS = {"openai_compatible"}
     _WEBUI_RUNTIME_ENV_FILE_PRIORITY_KEYS = frozenset(
         {
             "STOCK_LIST",
@@ -825,6 +836,27 @@ class Config:
                 self.agent_skill_routing, self._VALID_SKILL_ROUTING,
             )
             object.__setattr__(self, "agent_skill_routing", "auto")
+        if self.debate_backend not in self._VALID_DEBATE_BACKENDS:
+            _log.warning(
+                "Invalid DEBATE_BACKEND=%r, falling back to 'camel'. Valid: %s",
+                self.debate_backend,
+                self._VALID_DEBATE_BACKENDS,
+            )
+            object.__setattr__(self, "debate_backend", "camel")
+        if self.debate_fallback_backend not in self._VALID_DEBATE_FALLBACK_BACKENDS:
+            _log.warning(
+                "Invalid DEBATE_FALLBACK_BACKEND=%r, falling back to 'internal'. Valid: %s",
+                self.debate_fallback_backend,
+                self._VALID_DEBATE_FALLBACK_BACKENDS,
+            )
+            object.__setattr__(self, "debate_fallback_backend", "internal")
+        if self.camel_model_platform not in self._VALID_CAMEL_PLATFORMS:
+            _log.warning(
+                "Invalid CAMEL_MODEL_PLATFORM=%r, falling back to 'openai_compatible'. Valid: %s",
+                self.camel_model_platform,
+                self._VALID_CAMEL_PLATFORMS,
+            )
+            object.__setattr__(self, "camel_model_platform", "openai_compatible")
 
     # 单例实例存储
     _instance: Optional['Config'] = None
@@ -1250,6 +1282,26 @@ class Config:
                 1,
                 field_name='DEBATE_SIGNAL_CONVERGENCE',
                 minimum=0,
+            ),
+            debate_backend=os.getenv('DEBATE_BACKEND', 'camel').strip().lower(),
+            debate_fallback_backend=os.getenv('DEBATE_FALLBACK_BACKEND', 'internal').strip().lower(),
+            camel_model_platform=os.getenv('CAMEL_MODEL_PLATFORM', 'openai_compatible').strip().lower(),
+            camel_model_name=os.getenv('CAMEL_MODEL_NAME', '').strip(),
+            camel_base_url=os.getenv('CAMEL_BASE_URL', '').strip(),
+            camel_api_key=os.getenv('CAMEL_API_KEY') or None,
+            camel_temperature=parse_env_float(
+                os.getenv('CAMEL_TEMPERATURE'),
+                0.1,
+                field_name='CAMEL_TEMPERATURE',
+                minimum=0.0,
+                maximum=2.0,
+            ),
+            camel_max_tokens=parse_env_int(
+                os.getenv('CAMEL_MAX_TOKENS'),
+                4096,
+                field_name='CAMEL_MAX_TOKENS',
+                minimum=256,
+                maximum=32768,
             ),
             # Reflection mode settings
             reflection_enabled=os.getenv('REFLECTION_ENABLED', 'false').lower() == 'true',

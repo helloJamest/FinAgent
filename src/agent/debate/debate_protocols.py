@@ -136,6 +136,8 @@ class DebateResult:
     dashboard: Optional[Dict[str, Any]] = None
     duration_s: float = 0.0
     tokens_used: int = 0
+    backend: str = "internal"
+    fallback_used: bool = False
     error: Optional[str] = None
 
     def to_dict(self) -> Dict[str, Any]:
@@ -150,4 +152,6 @@ class DebateResult:
             "moderator_summary": self.moderator_summary,
             "duration_s": round(self.duration_s, 2),
             "tokens_used": self.tokens_used,
+            "backend": self.backend,
+            "fallback_used": self.fallback_used,
         }

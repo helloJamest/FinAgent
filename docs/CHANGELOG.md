@@ -18,6 +18,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - [新功能] API 客户端新增 `getBoardData` 方法支持直接获取打板策略原始数据
 - [chore] 恢复 CI、网络冒烟与 PR 静态检查工作流，并补齐 GitHub Copilot / Coding Agent 协作资产镜像
 - [测试] 新增 AI 资产、CI/PR 工作流、PR 模板与 Changelog `[Unreleased]` 格式守卫，防止协作治理漂移
+- [新功能] `AGENT_ARCH=debate` 新增 CAMEL-AI 主辩论后端，保留原 `DebateArena` 作为可配置回退，并通过统一结果协议兼容现有报告链路
+- [文档] 新增 `docs/debate-camel.md`，说明 CAMEL 可选依赖、OpenAI 兼容接口配置和回滚方式
 - [修复] `newspaper3k` 缺失时搜索服务不再在模块导入阶段失败，正文补抓会返回空内容并让主分析链路继续按无正文降级运行
 - [测试] Discord 平台签名测试在本地缺少可选 `PyNaCl` 依赖时显式跳过，避免离线测试基线在收集阶段中断
 - [修复] Agent runner 在最终回答阶段不再依赖第二次流式调用才能产出内容，避免非流式适配器或测试 mock 返回空结果

@@ -381,6 +381,29 @@ def _build_debate_orchestrator(config, registry, llm_adapter, skill_manager, *, 
     # Build Hermes learning components
     hermes, skill_memory, episode_store, debate_tracker = _build_hermes_components(config)
 
+    from src.agent.debate.internal_backend import InternalDebateBackend
+
+    internal_backend = InternalDebateBackend(
+        llm_adapter,
+        config=config,
+        skill_memory=skill_memory,
+        episode_store=episode_store,
+        debate_tracker=debate_tracker,
+    )
+    backend_name = getattr(config, "debate_backend", "camel")
+    if backend_name == "camel":
+        from src.agent.debate.camel_backend import CamelDebateBackend
+        from src.agent.debate.camel_model_adapter import CamelModelAdapter
+
+        fallback = internal_backend if getattr(config, "debate_fallback_backend", "internal") == "internal" else None
+        debate_backend = CamelDebateBackend(
+            config=config,
+            model_adapter=CamelModelAdapter(config),
+            fallback=fallback,
+        )
+    else:
+        debate_backend = internal_backend
+
     return DebateOrchestrator(
         tool_registry=registry,
         llm_adapter=llm_adapter,
@@ -392,6 +415,7 @@ def _build_debate_orchestrator(config, registry, llm_adapter, skill_manager, *, 
         skill_memory=skill_memory,
         episode_store=episode_store,
         debate_tracker=debate_tracker,
+        debate_backend=debate_backend,
     )
 
 
