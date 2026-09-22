@@ -4,7 +4,7 @@ DebateOrchestrator — integrates DebateArena into the agent pipeline.
 
 Presents the same ``run()`` / ``chat()`` interface as ``AgentOrchestrator``
 so callers need no changes. The pipeline is:
-  Technical → Intel → [Risk] → DebateArena → Decision Dashboard
+  Technical → Intel → [Risk] → DebateBackend → Decision Dashboard
 """
 
 from __future__ import annotations
@@ -70,6 +70,7 @@ class DebateOrchestrator:
         skill_memory=None,
         episode_store=None,
         debate_tracker=None,
+        debate_backend=None,
     ):
         self.tool_registry = tool_registry
         self.llm_adapter = llm_adapter
@@ -81,6 +82,7 @@ class DebateOrchestrator:
         self.skill_memory = skill_memory
         self.episode_store = episode_store
         self.debate_tracker = debate_tracker
+        self.debate_backend = debate_backend
 
     def _get_timeout_seconds(self) -> int:
         raw_value = getattr(self.config, "agent_orchestrator_timeout_s", 0)
@@ -209,23 +211,26 @@ class DebateOrchestrator:
                 all_tool_calls.extend(risk_result.meta.get("tool_calls_log", []))
                 models_used.extend(risk_result.meta.get("models_used", []))
 
-        # Step 4: DebateArena
-        from src.agent.debate import DebateArena
+        # Step 4: Pluggable debate backend. Direct callers without a factory
+        # supplied backend continue to use the original internal arena.
+        debate_backend = self.debate_backend
+        if debate_backend is None:
+            from src.agent.debate.internal_backend import InternalDebateBackend
 
-        arena = DebateArena(
-            self.llm_adapter,
-            config=self.config,
-            skill_memory=self.skill_memory,
-            episode_store=self.episode_store,
-            debate_tracker=self.debate_tracker,
-        )
+            debate_backend = InternalDebateBackend(
+                self.llm_adapter,
+                config=self.config,
+                skill_memory=self.skill_memory,
+                episode_store=self.episode_store,
+                debate_tracker=self.debate_tracker,
+            )
 
         if progress_callback:
             progress_callback({"type": "stage_start", "stage": "debate", "message": "Starting multi-agent debate..."})
 
         debate_t0 = time.time()
         remaining_timeout = max(0.0, timeout_s - (time.time() - t0)) if timeout_s else None
-        debate_result = arena.debate(
+        debate_result = debate_backend.debate(
             ctx,
             technical_opinion=technical_opinion,
             intel_opinion=intel_opinion,

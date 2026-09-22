@@ -367,7 +367,8 @@ class SystemConfigServiceTestCase(unittest.TestCase):
         agent_arch_schema = items["AGENT_ARCH"]["schema"]
         self.assertEqual(agent_arch_schema["options"][0]["value"], "single")
         self.assertEqual(agent_arch_schema["options"][1]["label"], "Multi Agent (Orchestrator)")
-        self.assertEqual(agent_arch_schema["validation"]["enum"], ["single", "multi"])
+        self.assertEqual(agent_arch_schema["options"][2]["value"], "debate")
+        self.assertEqual(agent_arch_schema["validation"]["enum"], ["single", "multi", "debate"])
 
         report_language_schema = items["REPORT_LANGUAGE"]["schema"]
         self.assertEqual(report_language_schema["validation"]["enum"], ["zh", "en"])

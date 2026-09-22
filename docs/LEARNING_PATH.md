@@ -150,7 +150,7 @@ AgentExecutor / AgentOrchestrator
 
 ## 三、Agent 调用路径（核心）
 
-### 3.1 两种 Agent 架构
+### 3.1 三种 Agent 架构
 
 系统通过配置 `AGENT_ARCH` 切换：
 
@@ -158,6 +158,7 @@ AgentExecutor / AgentOrchestrator
 |------|--------|------|------|
 | 单 Agent | `single`（默认） | `AgentExecutor` | 经典 ReAct 循环，一个 LLM 完成所有工作 |
 | 多 Agent | `multi` | `AgentOrchestrator` | 多智能体流水线，分工协作 |
+| 辩论 Agent | `debate` | `DebateOrchestrator` + CAMEL | 技术/情报/风控输入后，由 CAMEL 编排多空辩论 |
 
 **构建入口**: `src/agent/factory.py` — `build_agent_executor()`
 
@@ -508,6 +509,8 @@ SearchService
 | `STOCK_LIST` | 分析股票列表 | `.env` 配置 |
 | `LITELLM_MODEL` | 主 LLM 模型 | 未设置 |
 | `AGENT_ARCH` | Agent 架构 | `single` |
+| `DEBATE_BACKEND` | 辩论后端 | `camel` |
+| `DEBATE_FALLBACK_BACKEND` | CAMEL 失败时回退后端 | `internal` |
 | `AGENT_ORCHESTRATOR_MODE` | 编排模式 | `standard` |
 | `AGENT_MAX_STEPS` | 最大步骤 | `10` |
 | `AGENT_SKILL_DIR` | 自定义技能目录 | 未设置 |
