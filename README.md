@@ -45,6 +45,7 @@
 | 情报 | 公告与资金流 | 上市公司公告 + A股主力资金流向信号 |
 | 回测 | AI 回测验证 | 自动评估历史分析准确率，对比 AI 预测与实际走势 |
 | 智能体 | 策略对话 | 支持多轮策略问答，内置 11 种交易策略 |
+| 编排 | 三种 Agent 架构 | `single`、`multi`，以及由 CAMEL-AI 编排的 `debate` 辩论模式 |
 | 通知 | 多渠道推送 | Telegram、Discord、Slack、邮件、企业微信、飞书等 |
 | 自动化 | 定时运行 | GitHub Actions 定时执行，零成本 |
 
@@ -179,6 +180,34 @@ python main.py --stocks 600519    # 指定股票
 python main.py --serve-only       # 启动 WebUI + API
 ```
 
+### Agent 架构与 CAMEL 辩论模式
+
+通过 `AGENT_ARCH` 选择 Agent 运行架构：
+
+| 配置值 | 用途 | 说明 |
+|--------|------|------|
+| `single` | 单 Agent | 经典 ReAct 执行路径，默认模式 |
+| `multi` | 多 Agent | 技术、情报、风控和决策阶段流水线 |
+| `debate` | 多空辩论 | CAMEL-AI 负责多方、空方、风控和裁判角色编排 |
+
+`debate` 模式默认使用 CAMEL-AI，但 CAMEL 依赖是可选的，不影响 `single` 和 `multi`。首次启用时安装额外依赖并配置 OpenAI 兼容接口：
+
+```bash
+pip install -r requirements-camel.txt
+```
+
+```env
+AGENT_ARCH=debate
+DEBATE_BACKEND=camel
+DEBATE_FALLBACK_BACKEND=internal
+CAMEL_MODEL_PLATFORM=openai_compatible
+CAMEL_MODEL_NAME=your-model-name
+CAMEL_BASE_URL=https://provider.example/v1
+CAMEL_API_KEY=your-api-key
+```
+
+CAMEL 读取 FinAgent 已采集的技术、情报、风控和行情快照，不直接访问 `ToolRegistry`。CAMEL 初始化或执行失败时默认回退到原内置辩论实现；如需直接回滚，可设置 `DEBATE_BACKEND=internal`。完整配置、角色说明和依赖约束见 [CAMEL 辩论指南](docs/debate-camel.md)。
+
 ## 🖥️ WebUI / 桌面端
 
 ### Web 管理界面
@@ -233,6 +262,7 @@ FinAgent/
 - [WebUI 云端部署](docs/deploy-webui-cloud.md)
 - [桌面端打包指南](docs/desktop-package.md)
 - [LLM 模型配置指南](docs/LLM_CONFIG_GUIDE.md)
+- [CAMEL 辩论指南](docs/debate-camel.md)
 - [贡献指南](docs/CONTRIBUTING.md)
 
 ## 🤝 参与贡献
