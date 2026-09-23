@@ -177,6 +177,34 @@
 
 > 📖 本地運行、Docker 部署詳細步驟請參考 [完整配置指南](./full-guide.md)
 
+### Agent 架構與 CAMEL 辯論模式
+
+透過 `AGENT_ARCH` 選擇 Agent 執行架構：
+
+| 配置值 | 用途 | 說明 |
+|--------|------|------|
+| `single` | 單 Agent | 經典 ReAct 執行路徑，預設模式 |
+| `multi` | 多 Agent | 技術、情報、風控與決策流水線 |
+| `debate` | 多空辯論 | 由 CAMEL-AI 編排多方、空方、風控與裁判角色 |
+
+CAMEL 僅在 `AGENT_ARCH=debate` 時使用，且為可選依賴，不影響 `single` 和 `multi`。啟用時先安裝：
+
+```bash
+pip install -r requirements-camel.txt
+```
+
+```env
+AGENT_ARCH=debate
+DEBATE_BACKEND=camel
+DEBATE_FALLBACK_BACKEND=internal
+CAMEL_MODEL_PLATFORM=openai_compatible
+CAMEL_MODEL_NAME=your-model-name
+CAMEL_BASE_URL=https://provider.example/v1
+CAMEL_API_KEY=your-api-key
+```
+
+CAMEL 讀取 FinAgent 已採集的技術、情報、風控與行情快照，首版不直接訪問 `ToolRegistry`。CAMEL 初始化或執行失敗時預設回退到原內置辯論實現；如需直接回滾，可設置 `DEBATE_BACKEND=internal`。完整配置與依賴說明請參考 [CAMEL 辯論指南](./debate-camel.md)。
+
 ## 📱 推送效果
 
 ### 決策儀表盤
@@ -217,7 +245,7 @@
 
 ## 配置說明
 
-> 📖 完整環境變量、定時任務配置請參考 [完整配置指南](./full-guide.md)
+> 📖 完整環境變量、定時任務配置請參考 [完整配置指南](./full-guide.md)，CAMEL 辯論模式請參考 [CAMEL 辯論指南](./debate-camel.md)
 
 ## 🧩 FastAPI Web 服務（可選）
 

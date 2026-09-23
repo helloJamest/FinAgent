@@ -256,6 +256,34 @@ python main.py --stocks AAPL,TSLA,GOOGL
 python main.py --market-review
 ```
 
+### Agent Architectures and CAMEL Debate Mode
+
+Set `AGENT_ARCH` to choose the execution architecture:
+
+| Value | Use case | Description |
+|-------|----------|-------------|
+| `single` | Single Agent | Classic ReAct execution path, enabled by default |
+| `multi` | Multi Agent | Technical, intelligence, risk, and decision pipeline |
+| `debate` | Multi-agent debate | CAMEL-AI orchestrates bull, bear, risk, and moderator roles |
+
+CAMEL is optional and is used only by `AGENT_ARCH=debate`. Install the additional dependency and configure an OpenAI-compatible endpoint:
+
+```bash
+pip install -r requirements-camel.txt
+```
+
+```env
+AGENT_ARCH=debate
+DEBATE_BACKEND=camel
+DEBATE_FALLBACK_BACKEND=internal
+CAMEL_MODEL_PLATFORM=openai_compatible
+CAMEL_MODEL_NAME=your-model-name
+CAMEL_BASE_URL=https://provider.example/v1
+CAMEL_API_KEY=your-api-key
+```
+
+CAMEL receives the technical, intelligence, risk, and market snapshots already collected by FinAgent and does not access `ToolRegistry` in the first integration. If CAMEL initialization or execution fails, the original internal debate implementation is used by default. Set `DEBATE_BACKEND=internal` to roll back directly. See the [CAMEL Debate Guide](./debate-camel.md) for the full configuration and dependency notes.
+
 ### API Endpoints
 
 | Endpoint | Method | Description |
@@ -507,6 +535,7 @@ The home analysis input now behaves more like a search box, reducing the need to
 - [Bot Command Reference](bot-command.md)
 - [Feishu Bot Setup](bot/feishu-bot-config.md)
 - [DingTalk Bot Setup](bot/dingding-bot-config.md)
+- [CAMEL Debate Guide](debate-camel.md)
 
 ---
 
