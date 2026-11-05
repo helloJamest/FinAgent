@@ -6,6 +6,7 @@ export type AuthStatusResponse = {
   passwordSet?: boolean;
   passwordChangeable?: boolean;
   setupState: 'enabled' | 'password_retained' | 'no_password';
+  setupTokenRequired?: boolean;
 };
 
 export const authApi = {
@@ -18,13 +19,15 @@ export const authApi = {
     authEnabled: boolean,
     password?: string,
     passwordConfirm?: string,
-    currentPassword?: string
+    currentPassword?: string,
+    setupToken?: string,
   ): Promise<AuthStatusResponse> {
     const body: {
       authEnabled: boolean;
       password?: string;
       passwordConfirm?: string;
       currentPassword?: string;
+      setupToken?: string;
     } = { authEnabled };
     if (password !== undefined) {
       body.password = password;
@@ -35,14 +38,20 @@ export const authApi = {
     if (currentPassword !== undefined) {
       body.currentPassword = currentPassword;
     }
+    if (setupToken !== undefined) {
+      body.setupToken = setupToken;
+    }
     const { data } = await apiClient.post<AuthStatusResponse>('/api/v1/auth/settings', body);
     return data;
   },
 
-  async login(password: string, passwordConfirm?: string): Promise<void> {
-    const body: { password: string; passwordConfirm?: string } = { password };
+  async login(password: string, passwordConfirm?: string, setupToken?: string): Promise<void> {
+    const body: { password: string; passwordConfirm?: string; setupToken?: string } = { password };
     if (passwordConfirm !== undefined) {
       body.passwordConfirm = passwordConfirm;
+    }
+    if (setupToken !== undefined) {
+      body.setupToken = setupToken;
     }
     await apiClient.post('/api/v1/auth/login', body);
   },

@@ -30,6 +30,8 @@ RATE_LIMIT_WINDOW_SEC = 300
 RATE_LIMIT_MAX_FAILURES = 5
 SESSION_MAX_AGE_HOURS_DEFAULT = 24
 MIN_PASSWORD_LEN = 6
+SETUP_TOKEN_ENV = "ADMIN_SETUP_TOKEN"
+SETUP_TOKEN_FILENAME = ".setup_token"
 
 # Lazy-loaded state
 _auth_enabled: Optional[bool] = None
@@ -38,6 +40,8 @@ _password_hash_salt: Optional[bytes] = None
 _password_hash_stored: Optional[bytes] = None
 _rate_limit: dict[str, Tuple[int, float]] = {}
 _rate_limit_lock = None
+_setup_token: Optional[str] = None
+_setup_token_lock = None
 
 
 def _get_lock():
@@ -64,6 +68,99 @@ def _get_data_dir() -> Path:
 def _get_credential_path() -> Path:
     """Path to stored password hash file."""
     return _get_data_dir() / ".admin_password_hash"
+
+
+def _get_setup_token_path() -> Path:
+    """Path to the one-time bootstrap token used for the first password."""
+    return _get_data_dir() / SETUP_TOKEN_FILENAME
+
+
+def _get_setup_lock():
+    """Lazy init threading lock for setup token creation."""
+    global _setup_token_lock
+    if _setup_token_lock is None:
+        import threading
+        _setup_token_lock = threading.Lock()
+    return _setup_token_lock
+
+
+def get_setup_token() -> Optional[str]:
+    """Return the bootstrap token required to create the first admin password.
+
+    Resolution order:
+    1. ``ADMIN_SETUP_TOKEN`` environment variable (explicit operator override).
+    2. ``<data_dir>/.setup_token`` generated on first use with ``0600`` permissions.
+
+    The token is only required when no admin password exists and the request
+    does not originate from loopback. It is removed by :func:`clear_setup_token`
+    once the initial password has been set.
+    """
+    global _setup_token
+    if _setup_token:
+        return _setup_token
+
+    env_token = os.getenv(SETUP_TOKEN_ENV, "").strip()
+    if env_token:
+        _setup_token = env_token
+        return env_token
+
+    with _get_setup_lock():
+        if _setup_token:
+            return _setup_token
+
+        token_path = _get_setup_token_path()
+        try:
+            if token_path.exists():
+                stored = token_path.read_text(encoding="utf-8").strip()
+                if stored:
+                    _setup_token = stored
+                    return stored
+
+            token_path.parent.mkdir(parents=True, exist_ok=True)
+            new_token = secrets.token_urlsafe(32)
+            try:
+                fd = os.open(token_path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+            except FileExistsError:
+                # Another process created it first: reuse that token.
+                existing = token_path.read_text(encoding="utf-8").strip()
+                if existing:
+                    _setup_token = existing
+                    return existing
+                raise
+            with os.fdopen(fd, "w", encoding="utf-8") as file_obj:
+                file_obj.write(new_token)
+            _setup_token = new_token
+            logger.warning(
+                "Admin setup token generated at %s; required for the first login "
+                "from a non-loopback address.",
+                token_path,
+            )
+            return new_token
+        except OSError as exc:
+            logger.error("Failed to create or read setup token: %s", exc)
+            return None
+
+
+def verify_setup_token(token: Optional[str]) -> bool:
+    """Constant-time verification of a submitted bootstrap token."""
+    expected = get_setup_token()
+    submitted = (token or "").strip()
+    if not expected or not submitted:
+        return False
+    return hmac.compare_digest(submitted, expected)
+
+
+def clear_setup_token() -> None:
+    """Invalidate the bootstrap token after the first password has been set."""
+    global _setup_token
+    with _get_setup_lock():
+        _setup_token = None
+        try:
+            _get_setup_token_path().unlink()
+        except FileNotFoundError:
+            return
+        except OSError as exc:
+            logger.warning("Failed to remove setup token file: %s", exc)
 
 
 def _is_auth_enabled_from_env() -> bool:
@@ -188,9 +285,10 @@ def _load_credential_from_file() -> bool:
 
 def refresh_auth_state() -> None:
     """Reload auth-related state from disk and env."""
-    global _auth_enabled, _session_secret
+    global _auth_enabled, _session_secret, _setup_token
     _auth_enabled = None
     _session_secret = None
+    _setup_token = None
     _load_credential_from_file()
 
 

@@ -406,4 +406,49 @@ describe('LLMChannelEditor', () => {
       expect(screen.queryByLabelText('stale-openai')).not.toBeInTheDocument();
     });
   });
+
+  it('does not submit masked API keys when saving other channel fields', async () => {
+    update.mockResolvedValue({
+      success: true,
+      configVersion: 'v2',
+      appliedCount: 1,
+      skippedMaskedCount: 0,
+      reloadTriggered: false,
+      updatedKeys: [],
+      warnings: [],
+    });
+
+    render(
+      <LLMChannelEditor
+        items={[
+          { key: 'LLM_CHANNELS', value: 'openai' },
+          { key: 'LLM_OPENAI_PROTOCOL', value: 'openai' },
+          { key: 'LLM_OPENAI_BASE_URL', value: 'https://api.openai.com/v1' },
+          { key: 'LLM_OPENAI_ENABLED', value: 'true' },
+          { key: 'LLM_OPENAI_API_KEYS', value: '******' },
+          { key: 'LLM_OPENAI_MODELS', value: 'gpt-4o-mini' },
+        ]}
+        configVersion="v1"
+        maskToken="******"
+        onSaved={() => {}}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: /OpenAI 官方/i }));
+    fireEvent.change(screen.getByLabelText('模型（逗号分隔）'), {
+      target: { value: 'gpt-4o-mini,gpt-4o' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: '保存 AI 配置' }));
+
+    await waitFor(() => {
+      expect(update).toHaveBeenCalled();
+    });
+
+    const submittedKeys = (update.mock.calls[0][0].items as Array<{ key: string }>).map(
+      (item) => item.key,
+    );
+    expect(submittedKeys).toContain('LLM_OPENAI_MODELS');
+    expect(submittedKeys).not.toContain('LLM_OPENAI_API_KEYS');
+    expect(submittedKeys).not.toContain('LLM_OPENAI_API_KEY');
+  });
 });

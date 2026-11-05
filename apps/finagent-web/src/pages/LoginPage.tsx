@@ -10,7 +10,7 @@ import { useAuth } from '../hooks';
 import { SettingsAlert } from '../components/settings';
 
 const LoginPage: React.FC = () => {
-  const { login, passwordSet, setupState } = useAuth();
+  const { login, passwordSet, setupState, setupTokenRequired } = useAuth();
   const navigate = useNavigate();
 
   // Set page title
@@ -24,6 +24,7 @@ const LoginPage: React.FC = () => {
 
   const [password, setPassword] = useState('');
   const [passwordConfirm, setPasswordConfirm] = useState('');
+  const [setupToken, setSetupToken] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | ParsedApiError | null>(null);
 
@@ -55,9 +56,17 @@ const LoginPage: React.FC = () => {
       setError('两次输入的密码不一致');
       return;
     }
+    if (isFirstTime && setupTokenRequired && !setupToken.trim()) {
+      setError('首次远程设置密码需要填写服务器 setup token');
+      return;
+    }
     setIsSubmitting(true);
     try {
-      const result = await login(password, isFirstTime ? passwordConfirm : undefined);
+      const result = await login(
+        password,
+        isFirstTime ? passwordConfirm : undefined,
+        setupTokenRequired ? setupToken.trim() : undefined,
+      );
       if (result.success) {
         navigate(redirect, { replace: true });
       } else {
@@ -200,6 +209,22 @@ const LoginPage: React.FC = () => {
                     onChange={(e) => setPasswordConfirm(e.target.value)}
                     disabled={isSubmitting}
                     autoComplete="new-password"
+                  />
+                )}
+
+                {isFirstTime && setupTokenRequired && (
+                  <Input
+                    id="setupToken"
+                    type="text"
+                    appearance="login"
+                    iconType="key"
+                    label="服务器 Setup Token"
+                    placeholder="粘贴 data/.setup_token 中的令牌"
+                    hint="远程首次设置密码需要该令牌；本地 127.0.0.1 访问无需填写"
+                    value={setupToken}
+                    onChange={(e) => setSetupToken(e.target.value)}
+                    disabled={isSubmitting}
+                    autoComplete="off"
                   />
                 )}
               </div>

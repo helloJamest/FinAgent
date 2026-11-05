@@ -50,6 +50,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - [修复] 优化多 Agent 与单 Agent 的预算护栏语义：当后续阶段/步骤剩余预算低于最小阈值（首阶段除外）时会主动跳过并进行降级处理；若当前已完成阶段可支持构建降级报告，则返回 `success=True` 并携带非空内容；否则返回 `success=False`、`content=""`；`run_agent_loop` 预算过低时当前仍返回失败降级语义（`success=False`、`content=""`），`AgentExecutor` 保持统一下游契约。
 
 - [新功能] 集成 Anspire Search 作为可选语义搜索后端; 配置 `ANSPIRE_*` 可使用Anspire Search获取实时行情及新闻资讯，未配置时行为与此前一致。Anspire Search请使用 `tests/test_anspire_search.py`（手动脚本）。
+- [修复] Web 静态资源兜底路由新增路径归一化校验，拒绝解析到 `static/` 之外的路径，避免编码后的 `..` 读取 `.env`、数据库等仓库文件
+- [修复] 首次设置管理员密码新增 setup token 校验：非环回地址必须提供 `data/.setup_token` 或 `ADMIN_SETUP_TOKEN`，关闭远程抢注管理员账号的窗口；本地 `127.0.0.1` 保持零配置体验
+- [修复] 系统配置查询接口改为服务端掩码返回敏感字段（`is_masked=true`），提交掩码值时保留原有密钥，避免配置页响应与浏览器调试面板泄露 API Key
+- [文档] `.env.example`、`docs/full-guide.md`、`docs/deploy-webui-cloud.md` 补充 `ADMIN_SETUP_TOKEN` / `data/.setup_token` 的首次登录说明与排障步骤
 
 ## [3.12.0] - 2026-04-01
 

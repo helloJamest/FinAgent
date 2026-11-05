@@ -304,6 +304,23 @@ ADMIN_AUTH_ENABLED=true
 
 重启服务后，第一次访问网页时会要求设置初始密码。设置完成后，每次打开设置页面都需要输入密码，可以防止 API Key 等敏感配置被他人看到。
 
+首次设置密码时，如果浏览器不是从服务器本机（`127.0.0.1`）访问，页面会要求填写 **Setup Token**。它用于证明你拥有服务器文件系统权限，避免公网部署在“还没设密码”的窗口期被陌生人抢注管理员：
+
+```bash
+# Docker 部署：从容器内读取（默认数据卷挂载在宿主 ./data）
+docker compose -f docker/docker-compose.yml exec server cat /app/data/.setup_token
+# 本机部署
+cat ./data/.setup_token
+```
+
+也可以用环境变量显式指定（适合自动化部署）：
+
+```env
+ADMIN_SETUP_TOKEN=your-one-time-bootstrap-token
+```
+
+密码设置成功后令牌会自动失效并删除。若服务器上找不到该文件，请确认 `DATABASE_PATH` 指向的目录；本地 `127.0.0.1` 访问无需令牌。
+
 从本版本起，如果服务监听 `0.0.0.0` 或 `::` 且 `ADMIN_AUTH_ENABLED=false`，FinAgent 会拒绝启动，避免把分析、历史记录和配置接口误暴露到公网。仅在受信任内网或临时排障场景下，才可以显式设置：
 
 ```env

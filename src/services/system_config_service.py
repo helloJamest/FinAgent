@@ -152,7 +152,14 @@ class SystemConfigService:
         return display_map
 
     def get_config(self, include_schema: bool = True, mask_token: str = "******") -> Dict[str, Any]:
-        """Return current config values without server-side secret masking."""
+        """Return current config values with sensitive fields masked server-side.
+
+        Sensitive values are replaced by ``mask_token`` so that API responses,
+        browser devtools and logs never contain raw credentials. The companion
+        ``is_masked`` flag lets clients distinguish "configured but hidden" from
+        an empty value; ``update``/``validate`` already skip masked values so a
+        client can submit the form unchanged without wiping secrets.
+        """
         config_map = self._build_display_config_map(self._manager.read_config_map())
         registered_keys = set(get_registered_field_keys())
         all_keys = set(config_map.keys()) | registered_keys
@@ -171,11 +178,14 @@ class SystemConfigService:
         for key in all_keys:
             raw_value = config_map.get(key, "")
             field_schema = schema_by_key[key]
+            is_sensitive = bool(field_schema.get("is_sensitive", False))
+            has_value = bool(raw_value)
+            is_masked = is_sensitive and has_value
             item: Dict[str, Any] = {
                 "key": key,
-                "value": raw_value,
-                "raw_value_exists": bool(raw_value),
-                "is_masked": False,
+                "value": mask_token if is_masked else raw_value,
+                "raw_value_exists": has_value,
+                "is_masked": is_masked,
             }
             if include_schema:
                 item["schema"] = field_schema

@@ -24,6 +24,7 @@ describe('AuthSettingsCard', () => {
     useAuthMock.mockReturnValue({
       authEnabled: false,
       setupState: 'no_password',
+      setupTokenRequired: false,
       refreshStatus,
     });
   });
@@ -40,7 +41,7 @@ describe('AuthSettingsCard', () => {
     fireEvent.click(screen.getByRole('button', { name: '开启认证' }));
 
     await waitFor(() => {
-      expect(updateSettings).toHaveBeenCalledWith(true, 'passwd6', 'passwd6', undefined);
+      expect(updateSettings).toHaveBeenCalledWith(true, 'passwd6', 'passwd6', undefined, undefined);
     });
     expect(refreshStatus).toHaveBeenCalled();
     expect(await screen.findByText('认证设置已更新')).toBeInTheDocument();
@@ -50,6 +51,7 @@ describe('AuthSettingsCard', () => {
     useAuthMock.mockReturnValue({
       authEnabled: true,
       setupState: 'enabled',
+      setupTokenRequired: false,
       refreshStatus,
     });
     updateSettings.mockResolvedValue(undefined);
@@ -61,7 +63,7 @@ describe('AuthSettingsCard', () => {
     fireEvent.click(screen.getByRole('button', { name: '关闭认证' }));
 
     await waitFor(() => {
-      expect(updateSettings).toHaveBeenCalledWith(false, undefined, undefined, undefined);
+      expect(updateSettings).toHaveBeenCalledWith(false, undefined, undefined, undefined, undefined);
     });
     expect(refreshStatus).toHaveBeenCalled();
     expect(await screen.findByText('认证已关闭')).toBeInTheDocument();
@@ -71,6 +73,7 @@ describe('AuthSettingsCard', () => {
     useAuthMock.mockReturnValue({
       authEnabled: false,
       setupState: 'password_retained',
+      setupTokenRequired: false,
       refreshStatus,
     });
 
@@ -87,6 +90,7 @@ describe('AuthSettingsCard', () => {
     useAuthMock.mockReturnValue({
       authEnabled: true,
       setupState: 'enabled',
+      setupTokenRequired: false,
       refreshStatus,
     });
 
@@ -103,6 +107,54 @@ describe('AuthSettingsCard', () => {
     fireEvent.click(screen.getByRole('button', { name: '开启认证' }));
 
     expect(await screen.findByText('设置新密码是必填项')).toBeInTheDocument();
+    expect(updateSettings).not.toHaveBeenCalled();
+  });
+
+  it('requires the server setup token for remote first-time setup', async () => {
+    useAuthMock.mockReturnValue({
+      authEnabled: false,
+      setupState: 'no_password',
+      setupTokenRequired: true,
+      refreshStatus,
+    });
+    updateSettings.mockResolvedValue(undefined);
+    refreshStatus.mockResolvedValue(undefined);
+
+    render(<AuthSettingsCard />);
+
+    fireEvent.click(screen.getByRole('checkbox'));
+    fireEvent.change(screen.getByLabelText('设置管理员密码'), { target: { value: 'passwd6' } });
+    fireEvent.change(screen.getByLabelText('确认新密码'), { target: { value: 'passwd6' } });
+    fireEvent.change(screen.getByLabelText('服务器 Setup Token'), { target: { value: 'bootstrap-token' } });
+    fireEvent.click(screen.getByRole('button', { name: '开启认证' }));
+
+    await waitFor(() => {
+      expect(updateSettings).toHaveBeenCalledWith(
+        true,
+        'passwd6',
+        'passwd6',
+        undefined,
+        'bootstrap-token',
+      );
+    });
+  });
+
+  it('blocks remote setup when the setup token is empty', async () => {
+    useAuthMock.mockReturnValue({
+      authEnabled: false,
+      setupState: 'no_password',
+      setupTokenRequired: true,
+      refreshStatus,
+    });
+
+    render(<AuthSettingsCard />);
+
+    fireEvent.click(screen.getByRole('checkbox'));
+    fireEvent.change(screen.getByLabelText('设置管理员密码'), { target: { value: 'passwd6' } });
+    fireEvent.change(screen.getByLabelText('确认新密码'), { target: { value: 'passwd6' } });
+    fireEvent.click(screen.getByRole('button', { name: '开启认证' }));
+
+    expect(await screen.findByText('远程首次设置密码需要填写服务器 setup token')).toBeInTheDocument();
     expect(updateSettings).not.toHaveBeenCalled();
   });
 });
