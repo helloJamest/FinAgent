@@ -18,16 +18,17 @@ function createNextModeLabel(authEnabled: boolean, desiredEnabled: boolean) {
 }
 
 export const AuthSettingsCard: React.FC = () => {
-  const { authEnabled, setupState, refreshStatus } = useAuth();
+  const { authEnabled, setupState, setupTokenRequired, refreshStatus } = useAuth();
   const [desiredEnabled, setDesiredEnabled] = useState(authEnabled);
   const [currentPassword, setCurrentPassword] = useState('');
   const [password, setPassword] = useState('');
   const [passwordConfirm, setPasswordConfirm] = useState('');
+  const [setupToken, setSetupToken] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | ParsedApiError | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
-  const isDirty = desiredEnabled !== authEnabled || currentPassword || password || passwordConfirm;
+  const isDirty = desiredEnabled !== authEnabled || currentPassword || password || passwordConfirm || setupToken;
   const targetActionLabel = createNextModeLabel(authEnabled, desiredEnabled);
 
   const helperText = useMemo(() => {
@@ -53,6 +54,7 @@ export const AuthSettingsCard: React.FC = () => {
     setCurrentPassword('');
     setPassword('');
     setPasswordConfirm('');
+    setSetupToken('');
   };
 
   const handleSubmit = async (event: React.FormEvent) => {
@@ -70,6 +72,10 @@ export const AuthSettingsCard: React.FC = () => {
         setError('两次输入的新密码不一致');
         return;
       }
+      if (setupTokenRequired && !setupToken.trim()) {
+        setError('远程首次设置密码需要填写服务器 setup token');
+        return;
+      }
     }
 
     setIsSubmitting(true);
@@ -79,6 +85,7 @@ export const AuthSettingsCard: React.FC = () => {
         password.trim() || undefined,
         passwordConfirm.trim() || undefined,
         currentPassword.trim() || undefined,
+        setupTokenRequired ? setupToken.trim() || undefined : undefined,
       );
       await refreshStatus();
       setSuccessMessage(desiredEnabled ? '认证设置已更新' : '认证已关闭');
@@ -172,6 +179,21 @@ export const AuthSettingsCard: React.FC = () => {
                     placeholder="再次输入以确认"
                   />
                 </div>
+                {setupTokenRequired ? (
+                  <div className="space-y-3">
+                    <Input
+                      label="服务器 Setup Token"
+                      type="text"
+                      iconType="key"
+                      value={setupToken}
+                      onChange={(event) => setSetupToken(event.target.value)}
+                      autoComplete="off"
+                      disabled={isSubmitting}
+                      placeholder="data/.setup_token 中的令牌"
+                      hint="远程首次设置密码需要该令牌；本地 127.0.0.1 访问无需填写"
+                    />
+                  </div>
+                ) : null}
               </>
             ) : null}
           </div>

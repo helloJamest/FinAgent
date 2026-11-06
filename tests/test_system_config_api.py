@@ -57,11 +57,38 @@ class SystemConfigApiTestCase(unittest.TestCase):
         os.environ.pop("ENV_FILE", None)
         self.temp_dir.cleanup()
 
-    def test_get_config_returns_raw_secret_value(self) -> None:
+    def test_get_config_masks_secret_values(self) -> None:
         payload = system_config.get_system_config(include_schema=True, service=self.service).model_dump(by_alias=True)
         item_map = {item["key"]: item for item in payload["items"]}
-        self.assertEqual(item_map["GEMINI_API_KEY"]["value"], "secret-key-value")
-        self.assertFalse(item_map["GEMINI_API_KEY"]["is_masked"])
+
+        secret_item = item_map["GEMINI_API_KEY"]
+        self.assertEqual(secret_item["value"], "******")
+        self.assertTrue(secret_item["is_masked"])
+        self.assertTrue(secret_item["raw_value_exists"])
+
+        plain_item = item_map["STOCK_LIST"]
+        self.assertEqual(plain_item["value"], "600519,000001")
+        self.assertFalse(plain_item["is_masked"])
+
+    def test_put_config_keeps_secret_when_masked_value_is_submitted(self) -> None:
+        current = system_config.get_system_config(include_schema=False, service=self.service).model_dump()
+        payload = system_config.update_system_config(
+            request=UpdateSystemConfigRequest(
+                config_version=current["config_version"],
+                mask_token="******",
+                reload_now=False,
+                items=[
+                    {"key": "GEMINI_API_KEY", "value": "******"},
+                    {"key": "STOCK_LIST", "value": "600519"},
+                ],
+            ),
+            service=self.service,
+        ).model_dump()
+
+        self.assertEqual(payload["skipped_masked_count"], 1)
+        env_content = self.env_path.read_text(encoding="utf-8")
+        self.assertIn("GEMINI_API_KEY=secret-key-value", env_content)
+        self.assertIn("STOCK_LIST=600519", env_content)
 
     def test_put_config_updates_secret_and_plain_field(self) -> None:
         current = system_config.get_system_config(include_schema=False, service=self.service).model_dump()

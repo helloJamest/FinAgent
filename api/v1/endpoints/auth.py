@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import ipaddress
 import logging
 import os
 
@@ -17,8 +18,10 @@ from src.auth import (
     change_password,
     check_rate_limit,
     clear_rate_limit,
+    clear_setup_token,
     create_session,
     get_client_ip,
+    get_setup_token,
     has_stored_password,
     is_auth_enabled,
     is_password_changeable,
@@ -28,6 +31,7 @@ from src.auth import (
     rotate_session_secret,
     set_initial_password,
     verify_password,
+    verify_setup_token,
     verify_stored_password,
     verify_session,
 )
@@ -46,6 +50,11 @@ class LoginRequest(BaseModel):
 
     password: str = Field(default="", description="Admin password")
     password_confirm: str | None = Field(default=None, alias="passwordConfirm", description="Confirm (first-time)")
+    setup_token: str | None = Field(
+        default=None,
+        alias="setupToken",
+        description="Bootstrap token required for the first password from a non-loopback client",
+    )
 
 
 class ChangePasswordRequest(BaseModel):
@@ -67,6 +76,7 @@ class AuthSettingsRequest(BaseModel):
     password: str = Field(default="")
     password_confirm: str | None = Field(default=None, alias="passwordConfirm")
     current_password: str = Field(default="", alias="currentPassword")
+    setup_token: str | None = Field(default=None, alias="setupToken")
 
 
 def _cookie_params(request: Request) -> dict:
@@ -140,6 +150,52 @@ def _password_set_for_response(auth_enabled: bool) -> bool:
     return is_password_set() if auth_enabled else False
 
 
+def _is_loopback_client(request: Request | None) -> bool:
+    """Return True when the request originates from the local machine.
+
+    ``request.client.host`` is the raw peer address and is not affected by
+    ``X-Forwarded-For`` spoofing, so it is safe to use for this trust decision.
+    """
+    client = getattr(request, "client", None)
+    host = getattr(client, "host", "") if client is not None else ""
+    if not host:
+        return False
+    try:
+        return ipaddress.ip_address(str(host)).is_loopback
+    except ValueError:
+        return str(host).strip().lower() == "localhost"
+
+
+def _setup_token_required(
+    request: Request | None,
+    *,
+    password_exists: bool | None = None,
+) -> bool:
+    """Whether creating the first admin password needs a bootstrap token.
+
+    Local (loopback) operators keep the zero-friction first-run experience.
+    Any remote client must prove access to the server filesystem by presenting
+    the token from ``<data_dir>/.setup_token`` or ``ADMIN_SETUP_TOKEN``.
+    """
+    exists = has_stored_password() if password_exists is None else password_exists
+    if exists:
+        return False
+    return not _is_loopback_client(request)
+
+
+def _setup_token_rejection() -> JSONResponse:
+    return JSONResponse(
+        status_code=403,
+        content={
+            "error": "setup_token_required",
+            "message": (
+                "首次设置管理员密码需要 setup token。"
+                "请在服务器 data/.setup_token 读取，或通过 ADMIN_SETUP_TOKEN 配置。"
+            ),
+        },
+    )
+
+
 def _set_session_cookie(response: Response, session_value: str, request: Request) -> None:
     """Attach the admin session cookie to a response."""
     params = _cookie_params(request)
@@ -173,12 +229,19 @@ def _get_auth_status_dict(request: Request | None = None) -> dict:
     else:
         setup_state = "no_password"
 
+    setup_token_required = _setup_token_required(request)
+    if setup_token_required:
+        # Ensure the operator can read the token from disk before the first
+        # remote login attempt (generation is idempotent and cached).
+        get_setup_token()
+
     return {
         "authEnabled": auth_enabled,
         "loggedIn": logged_in,
         "passwordSet": _password_set_for_response(auth_enabled),
         "passwordChangeable": is_password_changeable() if auth_enabled else False,
         "setupState": setup_state,
+        "setupTokenRequired": setup_token_required,
     }
 
 
@@ -231,6 +294,10 @@ async def auth_update_settings(request: Request, body: AuthSettingsRequest):
                     status_code=400,
                     content={"error": "password_mismatch", "message": "两次输入的密码不一致"},
                 )
+            if _setup_token_required(
+                request, password_exists=stored_password_exists
+            ) and not verify_setup_token(body.setup_token):
+                return _setup_token_rejection()
             if has_stored_password():
                 return JSONResponse(
                     status_code=400,
@@ -245,6 +312,7 @@ async def auth_update_settings(request: Request, body: AuthSettingsRequest):
                     status_code=400,
                     content={"error": "invalid_password", "message": err},
                 )
+            clear_setup_token()
         elif not stored_password_exists:
             return JSONResponse(
                 status_code=400,
@@ -395,6 +463,11 @@ async def auth_login(request: Request, body: LoginRequest):
                 status_code=400,
                 content={"error": "password_mismatch", "message": "Passwords do not match"},
             )
+        if _setup_token_required(
+            request, password_exists=password_set
+        ) and not verify_setup_token(body.setup_token):
+            record_login_failure(ip)
+            return _setup_token_rejection()
         err = set_initial_password(password)
         if err:
             record_login_failure(ip)
@@ -402,6 +475,7 @@ async def auth_login(request: Request, body: LoginRequest):
                 status_code=400,
                 content={"error": "invalid_password", "message": err},
             )
+        clear_setup_token()
     else:
         if not verify_password(password):
             record_login_failure(ip)

@@ -185,21 +185,37 @@ def create_app(static_dir: Optional[Path] = None) -> FastAPI:
         # SPA 路由回退
         @app.get("/{full_path:path}", include_in_schema=False)
         async def serve_spa(request: Request, full_path: str):
-            """SPA 路由回退 - 非 API 路由返回 index.html"""
+            """SPA 路由回退 - 非 API 路由返回 index.html
+
+            安全说明：`full_path` 来自 URL，可能包含 `..`、绝对路径或编码后的
+            分隔符。这里必须先把候选路径解析为绝对路径，再确认它仍位于
+            `static_dir` 内，否则会把静态目录之外的文件（例如仓库根目录的
+            `.env`）直接返回给未认证调用方。
+            """
             if full_path == "api" or full_path.startswith("api/"):
                 return JSONResponse(
                     status_code=404,
                     content={"error": "not_found", "message": f"API endpoint /{full_path} not found"}
                 )
-            
-            file_path = static_dir / full_path
-            if file_path.exists() and file_path.is_file():
+
+            static_root = static_dir.resolve()
+            try:
+                file_path = (static_root / full_path).resolve(strict=False)
+                file_path.relative_to(static_root)
+            except (OSError, ValueError):
+                # Invalid path characters or traversal outside the static root.
+                return JSONResponse(
+                    status_code=404,
+                    content={"error": "not_found", "message": "Resource not found"},
+                )
+
+            if file_path.is_file():
                 # Issue #520: Explicitly resolve MIME type to avoid
                 # browsers rejecting JS modules served as text/plain.
                 content_type, _ = mimetypes.guess_type(str(file_path))
                 return FileResponse(file_path, media_type=content_type)
-            
-            return FileResponse(static_dir / "index.html")
+
+            return FileResponse(static_root / "index.html")
     
     return app
 

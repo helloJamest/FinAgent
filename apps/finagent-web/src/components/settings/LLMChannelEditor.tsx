@@ -696,6 +696,7 @@ function channelsToUpdateItems(
   previousChannelNames: string[],
   runtimeConfig: RuntimeConfig,
   includeRuntimeConfig: boolean,
+  maskToken: string,
 ): Array<{ key: string; value: string }> {
   const updates: Array<{ key: string; value: string }> = [];
   const activeNames = channels.map((channel) => channel.name.toUpperCase());
@@ -711,12 +712,18 @@ function channelsToUpdateItems(
 
   for (const channel of channels) {
     const prefix = `LLM_${channel.name.toUpperCase()}`;
-    const isMultiKey = channel.apiKey.includes(',');
+    // The backend masks configured API keys. Submitting the mask back would
+    // either be ignored (single key) or wipe the sibling key format, so leave
+    // credential fields untouched unless the user actually typed a new value.
+    const apiKeyIsMasked = Boolean(maskToken) && channel.apiKey === maskToken;
     updates.push({ key: `${prefix}_PROTOCOL`, value: channel.protocol });
     updates.push({ key: `${prefix}_BASE_URL`, value: channel.baseUrl });
     updates.push({ key: `${prefix}_ENABLED`, value: channel.enabled ? 'true' : 'false' });
-    updates.push({ key: `${prefix}_API_KEY${isMultiKey ? 'S' : ''}`, value: channel.apiKey });
-    updates.push({ key: `${prefix}_API_KEY${isMultiKey ? '' : 'S'}`, value: '' });
+    if (!apiKeyIsMasked) {
+      const isMultiKey = channel.apiKey.includes(',');
+      updates.push({ key: `${prefix}_API_KEY${isMultiKey ? 'S' : ''}`, value: channel.apiKey });
+      updates.push({ key: `${prefix}_API_KEY${isMultiKey ? '' : 'S'}`, value: '' });
+    }
     updates.push({ key: `${prefix}_MODELS`, value: channel.models });
   }
 
@@ -987,7 +994,7 @@ export const LLMChannelEditor: React.FC<LLMChannelEditorProps> = ({
     setSaveMessage(null);
 
     try {
-      const updateItems = channelsToUpdateItems(channels, initialNames, runtimeConfig, managesRuntimeConfig);
+      const updateItems = channelsToUpdateItems(channels, initialNames, runtimeConfig, managesRuntimeConfig, maskToken);
       await systemConfigApi.update({
         configVersion,
         maskToken,
